@@ -1,8 +1,3 @@
-pyorpg-server
-=============
-
-Server for the PyORPG project (http://www.powrtoch.org/pyorpg/)
-
 h1. PyORPG Server
 
 Currently unfinished server for the PyORPG project (http://www.powrtoch.org/pyorpg/)

@@ -1,0 +1,19 @@
+pyorpg-server
+=============
+
+Server for the PyORPG project (http://www.powrtoch.org/pyorpg/)
+
+h1. PyORPG Server
+
+Currently unfinished server for the PyORPG project (http://www.powrtoch.org/pyorpg/)
+
+h2. Instructions
+
+Start the server by running main.py with python 2:
+<notextile>
+<pre>
+python2 main.py
+</pre>
+</notextile>
+
+The server will then automatically create a database ("game_db.db") and fill in the user "admin" with the password "admin".

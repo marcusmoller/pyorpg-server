@@ -45,6 +45,7 @@ class ClientPackets:
 	= range(40)
 
 class ServerPackets:
+	SAlertMsg,   \
 	SAllChars,   \
 	SLoginOK,    \
 	SNewCharClasses, \
@@ -68,6 +69,7 @@ class ServerPackets:
 	SMapMsg,     \
 	SMapKey, \
 	SEditMap, \
+	SMapList, \
 	SLeft,       \
 	SHighIndex   \
-	= range(25)
+	= range(27)

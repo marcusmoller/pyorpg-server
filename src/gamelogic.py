@@ -196,6 +196,10 @@ def mapMsg(mapNum, msg, color):
 	packet = json.dumps([{"packet": ServerPackets.SMapMsg, "msg": msg, "color": color}])
 	g.conn.sendDataToAll(packet)
 
+def alertMsg(index, reason):
+	packet = json.dumps([{"packet": ServerPackets.SAlertMsg, "msg": reason}])
+	g.conn.sendDataTo(index, packet)
+
 def isPlaying(index):
 	if TempPlayer[index].inGame == True:
 		return True
@@ -206,10 +210,9 @@ def isLoggedIn(index):
 
 def closeConnection(index):
 	if index >= 0:
-		log("Disconnection")
 		leftGame(index)
-		mapCacheCreate(0)
-
+		log("Connection from " + str(index) + " has been terminated.")
+		clearPlayer(index)
 
 def createFullMapCache():
 	print "createFullMapCache()"
@@ -343,6 +346,20 @@ def sendMap(index, mapNum):
 	print "sendMap()"
 	g.conn.sendDataTo(index, json.dumps(MapCache[mapNum]))
 
+def sendMapList(index):
+	packet = []
+	packet.append({"packet": ServerPackets.SMapList})
+	print "todo: map editor client"
+
+	mapNames = []
+	for i in range(MAX_MAPS):
+		mapNames.append(Map[i].name)
+
+	packet.append({'mapnames': mapNames})
+
+	nPacket = json.dumps(packet)
+	g.conn.sendDataTo(index, nPacket)
+
 
 # (SHOULD BE IN datahandler.py)
 def sendPlayerDir(index):
@@ -363,3 +380,5 @@ def sendMapDone(index):
 def sendEditMap(index):
 	packet = json.dumps([{"packet": ServerPackets.SEditMap}])
 	g.conn.sendDataTo(index, packet)
+
+	sendMapList(index)

@@ -1,3 +1,5 @@
+import os
+
 # online player variables
 playersOnline = []
 highIndex = 0
@@ -11,3 +13,6 @@ maxClasses = 0
 
 # Protocol 
 conn = None
+
+# folders
+dataFolder = os.path.join('..', 'data')

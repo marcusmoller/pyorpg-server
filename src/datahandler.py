@@ -55,6 +55,9 @@ class DataHandler():
 		elif packetType == ClientPackets.CRequestEditMap:
 			self.handleRequestEditMap(index)
 
+		elif packetType == ClientPackets.CQuit:
+			self.handleQuit(index)
+
 		else:
 			# Packet is unknown - hacking attempt
 			print "hacking attempt"
@@ -72,17 +75,17 @@ class DataHandler():
 				# prevent hacking
 				if len(name) < 3 or len(password) < 3:
 					print "hacking attempt"
-					# call AlertMsg(index, "Your name and password must be at least three characters in length.")
+					alertMsg(index, "Your name and password must be at least three characters in length.")
 					return
 
 				# check if account already exists
 				if not accountExists(name):
 					addAccount(index, name, password)
 					log('Account ' + name + ' has been created')
-					#alertmsg "Your account has been created!"
+					alertMsg(index, "Your account has been created!")
 				else:
 					log('Account name has already been taken!')
-					#alertmsg "Sorry, that account name is already taken!"
+					alertMsg(index, "Sorry, that account name is already taken!")
 
 	''' Player login '''
 	def handleLogin(self, index, jsonData):
@@ -138,6 +141,9 @@ class DataHandler():
 			log("Character " + name + " added to " + getPlayerLogin(index) + "'s account.")
 			# alertMsg(player created)
 
+			# send characters to player
+			sendChars(index)
+
 
 
 	''' Player selected character '''
@@ -154,7 +160,7 @@ class DataHandler():
 				TempPlayer[index].charNum = charNum
 				joinGame(index)
 
-				log("Has began playing")
+				log("Has begun playing")
 
 	''' say msg '''
 	def handleSayMsg(self, index, jsonData):
@@ -268,5 +274,8 @@ class DataHandler():
 			return
 
 		sendEditMap(index)
+
+	def handleQuit(index):
+		closeConnection(index)
 
 

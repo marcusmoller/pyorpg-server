@@ -82,7 +82,7 @@ class Database():
 		result = self.sendQuery("SELECT COUNT(*) FROM " + tableName + ";")
 		return result.fetchone()[0]
 
-database = Database("game_db.db")
+database = Database(g.dataFolder + "/game_db.db")
 
 
 ############
@@ -188,12 +188,18 @@ def savePlayer(index):
 	rows = query.fetchone()
 
 	if rows == None:
-		print "new character"
 		# character/player doesnt exist, create it
-		accountID = 1
+		print "new character"
+
+		# get account id
+		query = database.sendQuery("SELECT id FROM accounts WHERE username='%s';" % getPlayerLogin(index))
+		result = query.fetchone()
+		accountID = result[0]
+
+		# save character
 		query = database.sendQuery("INSERT INTO characters (account_id, name, class, sprite, level, exp, access, map, x, y, direction, stats_strength, stats_defense, stats_speed, stats_magic, vital_hp, vital_mp, vital_sp) \
-			                        VALUES (1, '%s', 0, 1, 1, 0, 0, 1, 1, 1, 0, 5, 5, 5, 5, 10, 10, 10)" \
-			                        % getPlayerName(index))
+			                        VALUES (%i, '%s', 0, 1, 1, 0, 0, 1, 1, 1, 0, 5, 5, 5, 5, 10, 10, 10)" \
+			                        % (accountID, getPlayerName(index)))
 
 		# todo: fix this
 		'''query = database.sendQuery("INSERT INTO characters (account_id, name, class, sprite, level, exp, access, map, x, y, direction, stats_strength, stats_defense, stats_speed, stats_magic, vital_hp, vital_mp, vital_sp) \
@@ -218,7 +224,7 @@ def savePlayer(index):
 								                           	  getPlayerVital(index, 2)))'''
 
 	elif len(rows) > 0:
-		# character/player exists
+		# character/player exists, so update the character
 		query = database.sendQuery("UPDATE characters SET map=%i, \
 			                                              x=%i, \
 		                                                  y=%i, \
@@ -258,13 +264,17 @@ def loadPlayer(index, name):
 	print rows
 
 	for i in range(0, MAX_CHARS):
-		Player[index].char[i].name = rows[i][2]
-		Player[index].char[i].access = rows[i][7]
-		Player[index].char[i].sprite = rows[i][4]
-		Player[index].char[i].Map = rows[i][8]
-		Player[index].char[i].x = rows[i][9]
-		Player[index].char[i].y = rows[i][10]
-		Player[index].char[i].direction = rows[i][11]
+		try:
+			Player[index].char[i].name = rows[i][2]
+			Player[index].char[i].access = rows[i][7]
+			Player[index].char[i].sprite = rows[i][4]
+			Player[index].char[i].Map = rows[i][8]
+			Player[index].char[i].x = rows[i][9]
+			Player[index].char[i].y = rows[i][10]
+			Player[index].char[i].direction = rows[i][11]
+
+		except:
+			break
 
 def clearPlayer(index):
 	Player[index] = AccountClass()
@@ -324,7 +334,7 @@ def getClassStat(classNum, stat):
 #################
 
 def saveMap(mapNum):
-	pickle.dump(Map[mapNum], open("maps/" + str(mapNum) + ".pom", 'wb'))
+	pickle.dump(Map[mapNum], open(g.dataFolder + "/maps/" + str(mapNum) + ".pom", 'wb'))
 
 def saveMaps():
 	for i in range(MAX_MAPS):
@@ -334,11 +344,11 @@ def loadMaps():
 	checkMaps()
 
 	for i in range(MAX_MAPS):
-		Map[i] = pickle.load(open("maps/" + str(i) + ".pom", 'rb'))
+		Map[i] = pickle.load(open(g.dataFolder + "/maps/" + str(i) + ".pom", 'rb'))
 
 def checkMaps():
 	for i in range(MAX_MAPS):
-		if not os.path.isfile("maps/" + str(i) + ".pom"):
+		if not os.path.isfile(g.dataFolder + "/maps/" + str(i) + ".pom"):
 			saveMap(i)
 
 def clearMap(mapNum):

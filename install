@@ -1,0 +1,27 @@
+Building and installing PyORPG server
+-------------------------------------
+
+Running the server
+----------------
+
+First, the following supporting Python libraries should be installed.
+
+	- Python 2.4 or later
+	- Twisted
+
+After this, the game can be started by running the src/main.py file. For
+example, in Linux and Mac OS X this can be done from the terminal with the
+following commands:
+
+	$ cd src
+	$ python main.py
+	
+You can also run the game by simply executing the launcher script:
+
+    $ sh launcher.sh
+
+Making an installation package
+------------------------------
+
+TODO
+

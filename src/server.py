@@ -1,9 +1,11 @@
+import sys
+import time
+import logging
+import logging.handlers
+
 from twisted.internet.protocol import Protocol, Factory
 from twisted.internet import reactor, stdio
 from twisted.protocols.basic import LineReceiver
-
-import sys
-import time
 
 from gamelogic import *
 from datahandler import *
@@ -14,15 +16,18 @@ import globalvars as g
 dataHandler = None
 
 def startServer():
+	# start logging
+	setupLogging()
+
+	# start server
 	global dataHandler
 
 	startTime = time.time()
 
-	log("Starting server...")
-
+	g.serverLogger.info("Starting server...")
 	loadGameData()
 
-	log("Creating map cache...")
+	g.serverLogger.info("Creating map cache...")
 	createFullMapCache()
 
 	factory = gameServerFactory()
@@ -35,14 +40,43 @@ def startServer():
 
 	endTime = time.time()
 	totalTime = (endTime - startTime)*1000
-	log("Initialization complete. Server loaded in " + str(round(totalTime, 2)) + " ms.")
+	g.serverLogger.info("Initialization complete. Server loaded in " + str(round(totalTime, 2)) + " ms.")
 	reactor.run()
 
+def setupLogging():
+	''' setup loggers for server (general) and connection (in/out) '''
+	''' max log size is 1mb '''
+	# stream handler
+	ch = logging.StreamHandler()
+	ch.setLevel(logging.INFO)
+	ch.setFormatter(logging.Formatter('%(asctime)s (%(name)s) %(levelname)s: %(message)s'))
+
+	# file handler
+	fh = logging.handlers.RotatingFileHandler(filename='../server.log', maxBytes=1048576, backupCount=5)
+	fh.setLevel(logging.INFO)
+	fh.setFormatter(logging.Formatter('%(asctime)s (%(name)s) %(levelname)s: %(message)s'))
+
+
+	g.serverLogger = logging.getLogger('server')
+	g.serverLogger.setLevel(logging.INFO)
+
+	g.serverLogger.addHandler(ch)
+	g.serverLogger.addHandler(fh)
+
+
+	g.connectionLogger = logging.getLogger('connection')
+	g.connectionLogger.setLevel(logging.INFO)
+
+	g.connectionLogger.addHandler(ch)
+	g.connectionLogger.addHandler(fh)
+
 def loadGameData():
-	log("Loading classes...")
+	setupDatabase()
+
+	g.serverLogger.info("Loading classes...")
 	loadClasses()
 
-	log("Loading maps...")
+	g.serverLogger.info("Loading maps...")
 	loadMaps()
 
 	for i in range(MAX_PLAYERS):
@@ -57,7 +91,7 @@ class gameServerProtocol(LineReceiver):
 
 	def connectionMade(self):
 		self.factory.clients.append(self)
-		log("CONNECTION - Connection from " + str(self.transport.getHost()))
+		g.connectionLogger.info("CONNECTION - Connection from " + str(self.transport.getHost()))
 
 	def connectionLost(self, reason):
 		clientIndex = self.factory.clients.index(self)
@@ -69,8 +103,8 @@ class gameServerProtocol(LineReceiver):
 		global dataHandler
 		clientIndex = self.factory.clients.index(self)
 
-		log("Received data from " + str(self.transport.getHost()))
-		log(" -> " + data)
+		g.connectionLogger.debug("Received data from " + str(self.transport.getHost()))
+		g.connectionLogger.debug(" -> " + data)
 
 		# DEBUG
 		if data == "debug":
@@ -111,9 +145,9 @@ class gameServerFactory(Factory):
 
 def updateSavePlayers():
 	if g.totalPlayersOnline > 0:
-		log("Saving all players..")
+		g.serverLogger.info("Saving all players..")
 
 		for i in range(g.totalPlayersOnline):
 			savePlayer(i)
 
-		log("Saved all players")
+		g.serverLogger.info("Saved all players")

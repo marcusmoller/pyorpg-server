@@ -79,7 +79,7 @@ def playerMove(index, direction, movement):
 
 	if moved == False:
 		# hacking attempt
-		log("hacking attempt (playerMove)")
+		g.serverLogger.info("hacking attempt (playerMove)")
 
 def playerWarp(index, mapNum, x, y):
 	oldMap = getPlayerMap(index)
@@ -141,7 +141,7 @@ def leftGame(index):
 
 		savePlayer(index)
 
-		log("Player left game")
+		g.connectionLogger.info("Player left game")
 		sendLeftGame(index)
 
 		g.totalPlayersOnline -= 1
@@ -169,7 +169,7 @@ def updateHighIndex():
 	packet = json.dumps([{"packet": ServerPackets.SHighIndex, "highindex": g.highIndex}])
 	g.conn.sendDataToAll(packet)
 
-	log("High Index has been updated")
+	g.serverLogger.info("High Index has been updated")
 
 # (SHOULD BE IN SERVER.TCP?)
 ####################
@@ -215,7 +215,7 @@ def closeConnection(index):
 		clearPlayer(index)
 
 def createFullMapCache():
-	print "createFullMapCache()"
+	g.serverLogger.debug('createFullMapCache()')
 	for i in range(MAX_MAPS):
 		mapCacheCreate(i)
 
@@ -263,7 +263,7 @@ def sendChars(index):
 	g.conn.sendDataTo(index, nPacket)
 
 def sendJoinMap(index):
-	print "sendJoinMap()"
+	g.serverLogger.debug('sendJoinMap()')
 	# send data of all players (on current map) to index
 	for i in range(0, g.totalPlayersOnline):
 		if g.playersOnline[i] != index:
@@ -343,7 +343,7 @@ def sendPlayerData(index):
 	g.conn.sendDataToMap(getPlayerMap(index), packet)
 
 def sendMap(index, mapNum):
-	print "sendMap()"
+	g.serverLogger.debug('sendMap()')
 	g.conn.sendDataTo(index, json.dumps(MapCache[mapNum]))
 
 def sendMapList(index):
@@ -373,7 +373,7 @@ def sendLeftGame(index):
 	g.conn.sendDataToAllBut(index, packet)
 
 def sendMapDone(index):
-	print "sendMapDone()"
+	g.serverLogger.debug('sendMapDone()')
 	packet = json.dumps([{"packet": ServerPackets.SMapDone}])
 	g.conn.sendDataTo(index, packet)
 

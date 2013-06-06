@@ -4,6 +4,7 @@ from gamelogic import *
 from objects import *
 from constants import *
 from utils import *
+import globalvars as g
 
 #debug
 import time
@@ -81,10 +82,10 @@ class DataHandler():
 				# check if account already exists
 				if not accountExists(name):
 					addAccount(index, name, password)
-					log('Account ' + name + ' has been created')
+					g.serverLogger.info('Account ' + name + ' has been created')
 					alertMsg(index, "Your account has been created!")
 				else:
-					log('Account name has already been taken!')
+					g.serverLogger.info('Account name has already been taken!')
 					alertMsg(index, "Sorry, that account name is already taken!")
 
 	''' Player login '''
@@ -98,7 +99,7 @@ class DataHandler():
 				loadPlayer(index, plrName)
 				sendChars(index)
 
-				log(getPlayerLogin(index) + ' has logged in')
+				g.connectionLogger.info(getPlayerLogin(index) + ' has logged in')
 
 	''' player creates a new character '''
 	def handleAddChar(self, index, jsonData):
@@ -138,7 +139,7 @@ class DataHandler():
 
 			# everything went ok, add the character
 			addChar(index, name, sex, Class, charNum)
-			log("Character " + name + " added to " + getPlayerLogin(index) + "'s account.")
+			g.serverLogger.info("Character " + name + " added to " + getPlayerLogin(index) + "'s account.")
 			# alertMsg(player created)
 
 			# send characters to player
@@ -160,12 +161,12 @@ class DataHandler():
 				TempPlayer[index].charNum = charNum
 				joinGame(index)
 
-				log("Has begun playing")
+				g.connectionLogger.info("Has begun playing")
 
 	''' say msg '''
 	def handleSayMsg(self, index, jsonData):
 		msg = jsonData[0]["msg"]
-		log('player said something D:')
+		g.serverLogger.info('player said something D:')
 		mapMsg(getPlayerMap(index), getPlayerName(index) + ': ' + msg, sayColor)
 
 	''' Player message '''
@@ -257,7 +258,7 @@ class DataHandler():
 		# todo: ALOT!
 
 	def handleNeedMap(self, index, jsonData):
-		print "handleNeedMap()"
+		g.serverLogger.debug("handleNeedMap()")
 		answer = jsonData[0]["answer"]
 
 		if answer == 1:

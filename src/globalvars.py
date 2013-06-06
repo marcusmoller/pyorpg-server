@@ -16,3 +16,7 @@ conn = None
 
 # folders
 dataFolder = os.path.join('..', 'data')
+
+# loggers
+serverLogger = None
+connectionLogger = None

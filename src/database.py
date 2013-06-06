@@ -7,13 +7,19 @@ from utils import *
 
 import globalvars as g
 
+database = None
+
+def setupDatabase():
+	global database
+	database = Database(g.dataFolder + "/game_db.db")
+
 class Database():
 	def __init__(self, database):
 		# check if database exists, if not, create it
 		if os.path.isfile(database):
-			log('Database has been found')
+			g.serverLogger.info('Database has been found')
 		else:
-			log('No database has been found. Creating one...')
+			g.serverLogger.info('No database has been found. Creating one...')
 			self.createDatabase(database)
 			return
 
@@ -61,7 +67,7 @@ class Database():
 		self.sendQuery("INSERT INTO classes (name, sprite, stat_strength, stat_defense, stat_speed, stat_magic) VALUES ('Warrior', 1, 7, 5, 4, 2);")
 
 		self.saveChanges()
-		log('Database has been created!')
+		g.serverLogger.info('Database has been created!')
 
 
 	def sendQuery(self, query):
@@ -81,8 +87,6 @@ class Database():
 			uses sql function  "SELECT COUNT(*) FROM tableName; '''
 		result = self.sendQuery("SELECT COUNT(*) FROM " + tableName + ";")
 		return result.fetchone()[0]
-
-database = Database(g.dataFolder + "/game_db.db")
 
 
 ############
@@ -261,7 +265,6 @@ def loadPlayer(index, name):
 	# fetch character details
 	query = database.sendQuery("SELECT * FROM characters WHERE account_id=%i;" % accountID)
 	rows = query.fetchall()
-	print rows
 
 	for i in range(0, MAX_CHARS):
 		try:
@@ -304,8 +307,6 @@ def loadClasses():
 		Class[i].stat[Stats.defense] = int(rows[4])
 		Class[i].stat[Stats.speed] = int(rows[5])
 		Class[i].stat[Stats.magic] = int(rows[6])
-
-		print Class[i].stat[Stats.magic]
 
 def saveClasses():
 	# todo

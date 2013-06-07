@@ -95,6 +95,7 @@ class gameServerProtocol(LineReceiver):
 
 	def connectionLost(self, reason):
 		clientIndex = self.factory.clients.index(self)
+		self.transport.loseConnection()
 		closeConnection(clientIndex)
 		
 		self.factory.clients.remove(self)
@@ -105,11 +106,6 @@ class gameServerProtocol(LineReceiver):
 
 		g.connectionLogger.debug("Received data from " + str(self.transport.getHost()))
 		g.connectionLogger.debug(" -> " + data)
-
-		# DEBUG
-		if data == "debug":
-			print Player[55].Password
-			return
 
 		dataHandler.handleData(clientIndex, data)
 
@@ -129,8 +125,18 @@ class gameServerProtocol(LineReceiver):
 
 	def sendDataToMap(self, mapNum, data):
 		for i in range(0, len(self.factory.clients)):
+			try:
+				if getPlayerMap(g.playersOnline[i]) == mapNum:
+					self.sendDataTo(i, data)
+			except:
+				# havent logged in yet
+				continue
+
+	def sendDataToMapBut(self, mapNum, index, data):
+		for i in range(g.totalPlayersOnline):
 			if getPlayerMap(g.playersOnline[i]) == mapNum:
-				self.sendDataTo(i, data)
+				if g.playersOnline[i] != index:
+					self.sendDataTo(g.playersOnline[i], data)
 
 
 class gameServerFactory(Factory):

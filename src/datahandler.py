@@ -41,6 +41,9 @@ class DataHandler():
 		elif packetType == ClientPackets.CPlayerDir:
 			self.handlePlayerDir(index, jsonData)
 
+		elif packetType == ClientPackets.CAttack:
+			self.handleAttack(index)
+
 		elif packetType == ClientPackets.CSetSprite:
 			self.handleSetSprite(index, jsonData)
 
@@ -184,6 +187,27 @@ class DataHandler():
 		direction = jsonData[0]["direction"]
 		setPlayerDir(index, direction)
 		sendPlayerDir(index)
+
+
+	def handleAttack(self, index):
+		# try to attack a player
+		for i in range(g.totalPlayersOnline):
+			tempIndex = g.playersOnline[i]
+
+			# make sure we dont attack ourselves
+			if tempIndex != index:
+				# can we attack the player?
+				if canAttackPlayer(index, tempIndex):
+					# todo: check if player can block hit
+
+					# get the damage we can do
+					# todo
+
+					attackPlayer(index, tempIndex, 5)
+
+		# todo: handle attack npc
+
+
 
 	def handleSetSprite(self, index, jsonData):
 		if getPlayerAccess(index) < ADMIN_MAPPER:

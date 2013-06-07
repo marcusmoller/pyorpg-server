@@ -1,3 +1,4 @@
+import time
 import json
 
 from database import *
@@ -7,6 +8,76 @@ from packettypes import *
 from utils import *
 
 import globalvars as g
+
+def canAttackPlayer(attacker, victim):
+	# check attack timer
+	if time.time() < TempPlayer[attacker].attackTimer + 1:
+		return False
+
+	# check for subscript out of range
+	if not isPlaying(victim):
+		return False
+
+	# make sure they are on the same map
+	if not getPlayerMap(attacker) == getPlayerMap(victim):
+		return False
+
+	# make sure we dont attack the player if they are switching maps
+	if TempPlayer[victim].gettingMap == True:
+		return False
+
+	# check if at same coordinates
+
+	attackDir = getPlayerDir(attacker)
+
+	if attackDir == DIR_UP:
+		if not ((getPlayerY(victim) + 1 == getPlayerY(attacker)) and (getPlayerX(victim) == getPlayerX(attacker))):
+			return False
+	elif attackDir == DIR_DOWN:
+		if not ((getPlayerY(victim) - 1 == getPlayerY(attacker)) and (getPlayerX(victim) == getPlayerX(attacker))):
+			return False
+	elif attackDir == DIR_LEFT:
+		if not ((getPlayerY(victim) == getPlayerY(attacker)) and (getPlayerX(victim) + 1 == getPlayerX(attacker))):
+			return False
+	elif attackDir == DIR_RIGHT:
+		if not ((getPlayerY(victim) == getPlayerY(attacker)) and (getPlayerX(victim) - 1 == getPlayerX(attacker))):
+			return False
+
+	# check if map is attackable
+	# todo
+
+	# make sure they have more than 0 hp
+	if getPlayerVital(victim, Vitals.hp) <= 0:
+		return False
+
+	# check to make sure they dont have access
+	# todo
+
+	# check to make sure the victim isnt an admin
+	# todo
+
+	# make sure attacker is high enough level
+	# todo
+
+	# make sure victim is high enough level
+	# todo
+
+	return True
+
+def attackPlayer(attacker, victim, damage):
+	# check for subscript out of range
+	if isPlaying(attacker) == False or isPlaying(victim) == False or damage < 0:
+		return
+
+	# todo: check weapon
+
+	# send packet to map so they can see person attacking
+	packet = json.dumps([{"packet": ServerPackets.SAttack, "attacker": attacker}])
+	g.conn.sendDataToMapBut(getPlayerMap(attacker), attacker, packet)
+
+	# reset attack timer
+	TempPlayer[attacker].attackTimer = time.time()
+
 
 def playerMove(index, direction, movement):
 	moved = False
@@ -158,13 +229,15 @@ def updateHighIndex():
 		g.playersOnline = []
 		return
 
-	# resetarray
+	# reset array
 	g.playersOnline = []
 
 	for i in range(0, MAX_PLAYERS):
 		if len(getPlayerLogin(i)) > 0:
 			g.playersOnline.append(i)
 			g.highIndex = i
+
+	print g.highIndex
 
 	packet = json.dumps([{"packet": ServerPackets.SHighIndex, "highindex": g.highIndex}])
 	g.conn.sendDataToAll(packet)
@@ -211,7 +284,8 @@ def isLoggedIn(index):
 def closeConnection(index):
 	if index >= 0:
 		leftGame(index)
-		log("Connection from " + str(index) + " has been terminated.")
+
+		g.connectionLogger.info("Connection from " + str(index) + " has been terminated.")
 		clearPlayer(index)
 
 def createFullMapCache():

@@ -86,6 +86,9 @@ class TempPlayerClass():
 		self.charNum = 0
 		self.inGame = False
 
+		self.attackTimer = 0
+		self.target = 0
+
 		self.dataTimer = None
 		self.dataBytes = None
 		self.dataPackets = None

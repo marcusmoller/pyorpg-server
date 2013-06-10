@@ -179,7 +179,6 @@ class DataHandler():
             sendChars(index)
 
 
-
     ''' Player selected character '''
     def handleUseChar(self, index, jsonData):
         if not isPlaying(index):

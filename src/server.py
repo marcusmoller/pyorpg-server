@@ -42,6 +42,7 @@ def startServer():
     g.serverLogger.info("Initialization complete. Server loaded in " + str(round(totalTime, 2)) + " ms.")
     reactor.run()
 
+
 def setupLogging():
     ''' setup loggers for server (general) and connection (in/out) '''
     ''' max log size is 1mb '''

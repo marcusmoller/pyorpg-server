@@ -10,297 +10,361 @@ import globalvars as g
 import time
 
 class DataHandler():
-	def handleData(self, index, data):
-		jsonData = decodeJSON(data)
-		packetType = jsonData[0]["packet"]
+    def handleData(self, index, data):
+        jsonData = decodeJSON(data)
+        packetType = jsonData[0]["packet"]
 
-		if packetType == ClientPackets.CGetClasses:
-			self.handleGetClasses(index)
-
-		elif packetType == ClientPackets.CNewAccount:
-			self.handleNewAccount(index, jsonData)
+        if packetType == ClientPackets.CGetClasses:
+            self.handleGetClasses(index)
 
-		elif packetType == ClientPackets.CLogin:
-			self.handleLogin(index, jsonData)
+        elif packetType == ClientPackets.CNewAccount:
+            self.handleNewAccount(index, jsonData)
 
-		elif packetType == ClientPackets.CAddChar:
-			self.handleAddChar(index, jsonData)
+        elif packetType == ClientPackets.CLogin:
+            self.handleLogin(index, jsonData)
 
-		elif packetType == ClientPackets.CUseChar:
-			self.handleUseChar(index, jsonData)
+        elif packetType == ClientPackets.CAddChar:
+            self.handleAddChar(index, jsonData)
 
-		elif packetType == ClientPackets.CSayMsg:
-			self.handleSayMsg(index, jsonData)
+        elif packetType == ClientPackets.CUseChar:
+            self.handleUseChar(index, jsonData)
 
-		elif packetType == ClientPackets.CPlayerMsg:
-			self.handlePlayerMsg(index)
+        elif packetType == ClientPackets.CSayMsg:
+            self.handleSayMsg(index, jsonData)
 
-		elif packetType == ClientPackets.CPlayerMove:
-			self.handlePlayerMove(index, jsonData)
+        elif packetType == ClientPackets.CPlayerMsg:
+            self.handlePlayerMsg(index)
 
-		elif packetType == ClientPackets.CPlayerDir:
-			self.handlePlayerDir(index, jsonData)
+        elif packetType == ClientPackets.CPlayerMove:
+            self.handlePlayerMove(index, jsonData)
 
-		elif packetType == ClientPackets.CAttack:
-			self.handleAttack(index)
+        elif packetType == ClientPackets.CPlayerDir:
+            self.handlePlayerDir(index, jsonData)
 
-		elif packetType == ClientPackets.CSetSprite:
-			self.handleSetSprite(index, jsonData)
+        elif packetType == ClientPackets.CAttack:
+            self.handleAttack(index)
 
-		elif packetType == ClientPackets.CRequestNewMap:
-			self.handleRequestNewMap(index, jsonData)
+        elif packetType == ClientPackets.CWarpMeTo:
+            self.handleWarpMeTo(index, jsonData)
 
-		elif packetType == ClientPackets.CMapData:
-			self.handleMapData(index, jsonData)
+        elif packetType == ClientPackets.CWarpToMe:
+            self.handleWarpToMe(index, jsonData)
 
-		elif packetType == ClientPackets.CNeedMap:
-			self.handleNeedMap(index, jsonData)
+        elif packetType == ClientPackets.CWarpTo:
+            self.handleWarpTo(index, jsonData)
 
-		elif packetType == ClientPackets.CRequestEditMap:
-			self.handleRequestEditMap(index)
+        elif packetType == ClientPackets.CSetSprite:
+            self.handleSetSprite(index, jsonData)
 
-		elif packetType == ClientPackets.CQuit:
-			self.handleQuit(index)
+        elif packetType == ClientPackets.CRequestNewMap:
+            self.handleRequestNewMap(index, jsonData)
 
-		else:
-			# Packet is unknown - hacking attempt
-			print "hacking attempt"
+        elif packetType == ClientPackets.CMapData:
+            self.handleMapData(index, jsonData)
 
-	def handleGetClasses(self, index):
-		if not isPlaying(index):
-			sendNewCharClasses(index)
+        elif packetType == ClientPackets.CNeedMap:
+            self.handleNeedMap(index, jsonData)
 
-	def handleNewAccount(self, index, jsonData):
-		name = jsonData[0]['name']
-		password = jsonData[0]['password']
+        elif packetType == ClientPackets.CRequestEditMap:
+            self.handleRequestEditMap(index)
 
-		if not isPlaying(index):
-			if not isLoggedIn(index):
-				# prevent hacking
-				if len(name) < 3 or len(password) < 3:
-					print "hacking attempt"
-					alertMsg(index, "Your name and password must be at least three characters in length.")
-					return
+        elif packetType == ClientPackets.CQuit:
+            self.handleQuit(index)
 
-				# check if account already exists
-				if not accountExists(name):
-					addAccount(index, name, password)
-					g.serverLogger.info('Account ' + name + ' has been created')
-					alertMsg(index, "Your account has been created!")
-				else:
-					g.serverLogger.info('Account name has already been taken!')
-					alertMsg(index, "Sorry, that account name is already taken!")
+        else:
+            # Packet is unknown - hacking attempt
+            print "hacking attempt"
 
-	''' Player login '''
-	def handleLogin(self, index, jsonData):
-		if not isPlaying(index):
-			if not isLoggedIn(index):
-				plrName = jsonData[0]["name"]
-				plrPassword = jsonData[0]["password"]
+    def handleGetClasses(self, index):
+        if not isPlaying(index):
+            sendNewCharClasses(index)
 
-				# load the player
-				loadPlayer(index, plrName)
-				sendChars(index)
+    def handleNewAccount(self, index, jsonData):
+        name = jsonData[0]['name']
+        password = jsonData[0]['password']
 
-				g.connectionLogger.info(getPlayerLogin(index) + ' has logged in')
+        if not isPlaying(index):
+            if not isLoggedIn(index):
+                # prevent hacking
+                if len(name) < 3 or len(password) < 3:
+                    print "hacking attempt"
+                    alertMsg(index, "Your name and password must be at least three characters in length.")
+                    return
 
-	''' player creates a new character '''
-	def handleAddChar(self, index, jsonData):
-		if not isPlaying(index):
-			name = jsonData[0]["name"]
-			sex = jsonData[0]["sex"]
-			Class = jsonData[0]["class"]
-			charNum = jsonData[0]["slot"]
+                # check if account already exists
+                if not accountExists(name):
+                    addAccount(index, name, password)
+                    g.serverLogger.info('Account ' + name + ' has been created')
+                    alertMsg(index, "Your account has been created!")
+                else:
+                    g.serverLogger.info('Account name has already been taken!')
+                    alertMsg(index, "Sorry, that account name is already taken!")
 
-			# prevent hacking
-			if len(name) < 3:
-				print "hacking alert (handleAddChar() too short name)"
-				return
+    ''' Player login '''
+    def handleLogin(self, index, jsonData):
+        if not isPlaying(index):
+            if not isLoggedIn(index):
+                plrName = jsonData[0]["name"]
+                plrPassword = jsonData[0]["password"]
 
-			#todo: check for certain letters
+                # load the player
+                loadPlayer(index, plrName)
+                sendChars(index)
 
+                g.connectionLogger.info(getPlayerLogin(index) + ' has logged in')
 
-			if charNum < 0 or charNum > MAX_CHARS:
-				print "hacking attempt (handleaddChar() invalid charnum)"
-				return
+    ''' player creates a new character '''
+    def handleAddChar(self, index, jsonData):
+        if not isPlaying(index):
+            name = jsonData[0]["name"]
+            sex = jsonData[0]["sex"]
+            Class = jsonData[0]["class"]
+            charNum = jsonData[0]["slot"]
 
-			#todo: check sex
+            # prevent hacking
+            if len(name) < 3:
+                print "hacking alert (handleAddChar() too short name)"
+                return
 
-			if Class < 0 or Class > g.maxClasses:
-				print "hacking attempt (handleaddChar() invalid class)"
-				return
+            #todo: check for certain letters
 
-			# check if a character already exists in slot
-			if charExist(index, charNum):
-				print "character slot already in use (handleaddchar())"
-				return
 
-			# check if name is in use
-			if findChar(name):
-				print "name already in use"
-				return
+            if charNum < 0 or charNum > MAX_CHARS:
+                print "hacking attempt (handleaddChar() invalid charnum)"
+                return
 
-			# everything went ok, add the character
-			addChar(index, name, sex, Class, charNum)
-			g.serverLogger.info("Character " + name + " added to " + getPlayerLogin(index) + "'s account.")
-			# alertMsg(player created)
+            #todo: check sex
 
-			# send characters to player
-			sendChars(index)
+            if Class < 0 or Class > g.maxClasses:
+                print "hacking attempt (handleaddChar() invalid class)"
+                return
 
+            # check if a character already exists in slot
+            if charExist(index, charNum):
+                print "character slot already in use (handleaddchar())"
+                return
+
+            # check if name is in use
+            if findChar(name):
+                print "name already in use"
+                return
+
+            # everything went ok, add the character
+            addChar(index, name, sex, Class, charNum)
+            g.serverLogger.info("Character " + name + " added to " + getPlayerLogin(index) + "'s account.")
+            # alertMsg(player created)
+
+            # send characters to player
+            sendChars(index)
+
+
+
+    ''' Player selected character '''
+    def handleUseChar(self, index, jsonData):
+        if not isPlaying(index):
+            charNum = jsonData[0]["charslot"]
+
+            if charNum < 0 or charNum > MAX_CHARS:
+                print "hacking attempt (handleUseChar)"
+                return
+
+            # make sure character exists
+            if charExist(index, charNum):
+                TempPlayer[index].charNum = charNum
+                joinGame(index)
+
+                g.connectionLogger.info("Has begun playing")
+
+    ''' say msg '''
+    def handleSayMsg(self, index, jsonData):
+        msg = jsonData[0]["msg"]
+        g.serverLogger.info('player said something D:')
+        mapMsg(getPlayerMap(index), getPlayerName(index) + ': ' + msg, sayColor)
+
+    ''' Player message '''
+    def handlePlayerMsg(self, index):
+        print "player msg"
+
+    ''' Player movement '''
+    def handlePlayerMove(self, index, jsonData):
+        direction = jsonData[0]["direction"]
+        movement = jsonData[0]["moving"]
+        playerMove(index, direction, movement)
+
+    ''' Player direction '''
+    def handlePlayerDir(self, index, jsonData):
+        direction = jsonData[0]["direction"]
+        setPlayerDir(index, direction)
+        sendPlayerDir(index)
+
+
+    def handleAttack(self, index):
+        # try to attack a player
+        for i in range(g.totalPlayersOnline):
+            tempIndex = g.playersOnline[i]
 
-
-	''' Player selected character '''
-	def handleUseChar(self, index, jsonData):
-		if not isPlaying(index):
-			charNum = jsonData[0]["charslot"]
-
-			if charNum < 0 or charNum > MAX_CHARS:
-				print "hacking attempt (handleUseChar)"
-				return
-
-			# make sure character exists
-			if charExist(index, charNum):
-				TempPlayer[index].charNum = charNum
-				joinGame(index)
-
-				g.connectionLogger.info("Has begun playing")
-
-	''' say msg '''
-	def handleSayMsg(self, index, jsonData):
-		msg = jsonData[0]["msg"]
-		g.serverLogger.info('player said something D:')
-		mapMsg(getPlayerMap(index), getPlayerName(index) + ': ' + msg, sayColor)
-
-	''' Player message '''
-	def handlePlayerMsg(self, index):
-		print "player msg"
-
-	''' Player movement '''
-	def handlePlayerMove(self, index, jsonData):
-		direction = jsonData[0]["direction"]
-		movement = jsonData[0]["moving"]
-		playerMove(index, direction, movement)
-
-	''' Player direction '''
-	def handlePlayerDir(self, index, jsonData):
-		direction = jsonData[0]["direction"]
-		setPlayerDir(index, direction)
-		sendPlayerDir(index)
-
-
-	def handleAttack(self, index):
-		# try to attack a player
-		for i in range(g.totalPlayersOnline):
-			tempIndex = g.playersOnline[i]
-
-			# make sure we dont attack ourselves
-			if tempIndex != index:
-				# can we attack the player?
-				if canAttackPlayer(index, tempIndex):
-					# todo: check if player can block hit
-
-					# get the damage we can do
-					# todo
-
-					attackPlayer(index, tempIndex, 5)
-
-		# todo: handle attack npc
-
-
-
-	def handleSetSprite(self, index, jsonData):
-		if getPlayerAccess(index) < ADMIN_MAPPER:
-			print "hacking attempt"
-			return
-
-		n = jsonData[0]["sprite"]
-
-		setPlayerSprite(index, n)
-		sendPlayerData(index)
-
-	def handleRequestNewMap(self, index, jsonData):
-		direction = jsonData[0]["direction"]
-
-		if direction < DIR_UP or direction > DIR_RIGHT:
-			print "hacking attempt"
-			return
-
-		playerMove(index, direction, 1)
-
-	def handleMapData(self, index, jsonData):
-		if getPlayerAccess(index) < ADMIN_MAPPER:
-			print "hacking attempt - admin cloning"
-			return
-
-		mapNum = getPlayerMap(index)
-
-		revision = Map[mapNum].revision + 1
-
-		clearMap(mapNum)
-
-		Map[mapNum].name = jsonData[0]["mapname"]
-		Map[mapNum].revision = revision
-		Map[mapNum].moral = jsonData[0]["moral"]
-		Map[mapNum].tileSet = jsonData[0]["tileset"]
-		Map[mapNum].up = jsonData[0]["up"]
-		Map[mapNum].down = jsonData[0]["down"]
-		Map[mapNum].left = jsonData[0]["left"]
-		Map[mapNum].right = jsonData[0]["right"]
-		Map[mapNum].bootMap = jsonData[0]["bootmap"]
-		Map[mapNum].bootx = jsonData[0]["bootx"]
-		Map[mapNum].booty = jsonData[0]["booty"]
-
-		tile_i = 1
-		#todo: fix [0]
-		for x in range(MAX_MAPX):
-			for y in range(MAX_MAPY):
-				Map[mapNum].tile[x][y].ground = jsonData[tile_i][0]["ground"]
-				Map[mapNum].tile[x][y].mask = jsonData[tile_i][0]["mask"]
-				Map[mapNum].tile[x][y].anim = jsonData[tile_i][0]["animation"]
-				Map[mapNum].tile[x][y].fringe = jsonData[tile_i][0]["fringe"]
-				Map[mapNum].tile[x][y].type = jsonData[tile_i][0]["type"]
-				Map[mapNum].tile[x][y].data1 = jsonData[tile_i][0]["data1"]
-				Map[mapNum].tile[x][y].data2 = jsonData[tile_i][0]["data2"]
-				Map[mapNum].tile[x][y].data3 = jsonData[tile_i][0]["data3"]
-
-				tile_i += 1
-
-		# save map
-		saveMap(mapNum)
-		mapCacheCreate(mapNum)
-
-		# refresh map for everyone online
-		for i in range(g.totalPlayersOnline):
-			index = g.playersOnline[i]
-
-			if isPlaying(index):
-				if getPlayerMap(index) == mapNum:
-					playerWarp(index, mapNum, getPlayerX(index), getPlayerY(index))
-
-
-		# todo: ALOT!
-
-	def handleNeedMap(self, index, jsonData):
-		g.serverLogger.debug("handleNeedMap()")
-		answer = jsonData[0]["answer"]
-
-		if answer == 1:
-			# needs new revision
-			sendMap(index, getPlayerMap(index))
-
-		sendJoinMap(index)
-		TempPlayer[index].gettingMap = False
-		sendMapDone(index)
-
-	def handleRequestEditMap(self, index):
-		if getPlayerAccess(index) < ADMIN_MAPPER:
-			print "hacking attempt"
-			return
-
-		sendEditMap(index)
-
-	def handleQuit(index):
-		closeConnection(index)
+            # make sure we dont attack ourselves
+            if tempIndex != index:
+                # can we attack the player?
+                if canAttackPlayer(index, tempIndex):
+                    # todo: check if player can block hit
+
+                    # get the damage we can do
+                    # todo
+
+                    attackPlayer(index, tempIndex, 5)
+
+        # todo: handle attack npc
+
+    def handleWarpMeTo(self, index, jsonData):
+        if getPlayerAccess(index) < ADMIN_MAPPER:
+            print "hacking attempt"
+            return
+
+        playerName = jsonData[0]['name']
+        playerIndex = findPlayer(playerName)
+
+        if playerIndex != index:
+            if playerIndex is not None:
+                playerWarp(index, getPlayerMap(playerIndex), getPlayerX(playerIndex), getPlayerY(playerIndex))
+                # playermsg
+                # playermsg
+                g.connectionLogger.info(getPlayerName(index) + ' has warped to ' + getPlayerName(playerIndex) + ', map #' + str(getPlayerMap(index)))
+            else:
+                #playermsg (not online)
+                return
+        else:
+            #playermsg (cannot warp to self)
+            return
+
+    def handleWarpToMe(self, index, jsonData):
+        if getPlayerAccess(index) < ADMIN_MAPPER:
+            print "hacking attempt"
+            return
+
+        playerName = jsonData[0]['name']
+        playerIndex = findPlayer(playerName)
+
+        if playerIndex != index:
+            if playerIndex is not None:
+                playerWarp(playerIndex, getPlayerMap(index), getPlayerX(index), getPlayerY(index))
+                # playermsg
+                # playermsg
+                g.connectionLogger.info(getPlayerName(index) + ' has warped ' + getPlayerName(playerIndex) + ' to self, map #' + str(getPlayerMap(index)))
+            else:
+                #playermsg (not online)
+                return
+        else:
+            #playermsg (cannot warp to self)
+            return
+
+    def handleWarpTo(self, index, jsonData):
+        if getPlayerAccess(index) < ADMIN_MAPPER:
+            print "hacking attempt"
+            return
+
+        mapNum = jsonData[0]['map']
+
+        if mapNum < 0 or mapNum > MAX_MAPS:
+            print "hacking attempt"
+            return
+
+        playerWarp(index, mapNum, getPlayerX(index), getPlayerY(index))
+        # playerMsg
+        g.connectionLogger.info(getPlayerName(index) + ' warped to map #' + str(mapNum))
+
+    def handleSetSprite(self, index, jsonData):
+        if getPlayerAccess(index) < ADMIN_MAPPER:
+            print "hacking attempt"
+            return
+
+        n = jsonData[0]["sprite"]
+
+        setPlayerSprite(index, n)
+        sendPlayerData(index)
+
+    def handleRequestNewMap(self, index, jsonData):
+        direction = jsonData[0]["direction"]
+
+        if direction < DIR_UP or direction > DIR_RIGHT:
+            print "hacking attempt"
+            return
+
+        playerMove(index, direction, 1)
+
+    def handleMapData(self, index, jsonData):
+        if getPlayerAccess(index) < ADMIN_MAPPER:
+            print "hacking attempt - admin cloning"
+            return
+
+        mapNum = getPlayerMap(index)
+
+        revision = Map[mapNum].revision + 1
+
+        clearMap(mapNum)
+
+        Map[mapNum].name = jsonData[0]["mapname"]
+        Map[mapNum].revision = revision
+        Map[mapNum].moral = jsonData[0]["moral"]
+        Map[mapNum].tileSet = jsonData[0]["tileset"]
+        Map[mapNum].up = jsonData[0]["up"]
+        Map[mapNum].down = jsonData[0]["down"]
+        Map[mapNum].left = jsonData[0]["left"]
+        Map[mapNum].right = jsonData[0]["right"]
+        Map[mapNum].bootMap = jsonData[0]["bootmap"]
+        Map[mapNum].bootx = jsonData[0]["bootx"]
+        Map[mapNum].booty = jsonData[0]["booty"]
+
+        tile_i = 1
+        #todo: fix [0]
+        for x in range(MAX_MAPX):
+            for y in range(MAX_MAPY):
+                Map[mapNum].tile[x][y].ground = jsonData[tile_i][0]["ground"]
+                Map[mapNum].tile[x][y].mask = jsonData[tile_i][0]["mask"]
+                Map[mapNum].tile[x][y].anim = jsonData[tile_i][0]["animation"]
+                Map[mapNum].tile[x][y].fringe = jsonData[tile_i][0]["fringe"]
+                Map[mapNum].tile[x][y].type = jsonData[tile_i][0]["type"]
+                Map[mapNum].tile[x][y].data1 = jsonData[tile_i][0]["data1"]
+                Map[mapNum].tile[x][y].data2 = jsonData[tile_i][0]["data2"]
+                Map[mapNum].tile[x][y].data3 = jsonData[tile_i][0]["data3"]
+
+                tile_i += 1
+
+        # save map
+        saveMap(mapNum)
+        mapCacheCreate(mapNum)
+
+        # refresh map for everyone online
+        for i in range(g.totalPlayersOnline):
+            index = g.playersOnline[i]
+
+            if isPlaying(index):
+                if getPlayerMap(index) == mapNum:
+                    playerWarp(index, mapNum, getPlayerX(index), getPlayerY(index))
+
+
+        # todo: ALOT!
+
+    def handleNeedMap(self, index, jsonData):
+        g.serverLogger.debug("handleNeedMap()")
+        answer = jsonData[0]["answer"]
+
+        if answer == 1:
+            # needs new revision
+            sendMap(index, getPlayerMap(index))
+
+        sendJoinMap(index)
+        TempPlayer[index].gettingMap = False
+        sendMapDone(index)
+
+    def handleRequestEditMap(self, index):
+        if getPlayerAccess(index) < ADMIN_MAPPER:
+            print "hacking attempt"
+            return
+
+        sendEditMap(index)
+
+    def handleQuit(index):
+        closeConnection(index)
 
 

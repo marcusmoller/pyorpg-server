@@ -104,8 +104,29 @@ class DataHandler():
     def handleLogin(self, index, jsonData):
         if not isPlaying(index):
             if not isLoggedIn(index):
+
                 plrName = jsonData[0]["name"]
                 plrPassword = jsonData[0]["password"]
+
+                # todo: check version
+
+                # todo: is shutting down?
+
+                if len(plrName) < 3 or len(plrPassword) < 3:
+                    #alert msg
+                    return
+
+                if not accountExists(plrName):
+                    # alert msg
+                    return
+
+                if not passwordOK(plrName, plrPassword):
+                    # alert msg
+                    return
+
+                if isMultiAccounts(plrName):
+                    # alert msg
+                    return
 
                 # load the player
                 loadPlayer(index, plrName)
@@ -197,7 +218,6 @@ class DataHandler():
         setPlayerDir(index, direction)
         sendPlayerDir(index)
 
-
     def handleAttack(self, index):
         # try to attack a player
         for i in range(g.totalPlayersOnline):
@@ -227,14 +247,14 @@ class DataHandler():
         if playerIndex != index:
             if playerIndex is not None:
                 playerWarp(index, getPlayerMap(playerIndex), getPlayerX(playerIndex), getPlayerY(playerIndex))
-                # playermsg
-                # playermsg
+                playerMsg(playerIndex, getPlayerName(index) + ' has been warped to you.', textColor.BRIGHT_BLUE)
+                playerMsg(index, 'You have been warped to ' + getPlayerName(playerIndex) + '.', textColor.BRIGHT_BLUE)
                 g.connectionLogger.info(getPlayerName(index) + ' has warped to ' + getPlayerName(playerIndex) + ', map #' + str(getPlayerMap(index)))
             else:
-                #playermsg (not online)
+                playerMsg(index, 'Player is not online.', textColor.RED) # white?
                 return
         else:
-            #playermsg (cannot warp to self)
+            playerMsg(index, 'You cannot warp to yourself!', textColor.RED) # white?
             return
 
     def handleWarpToMe(self, index, jsonData):
@@ -248,14 +268,14 @@ class DataHandler():
         if playerIndex != index:
             if playerIndex is not None:
                 playerWarp(playerIndex, getPlayerMap(index), getPlayerX(index), getPlayerY(index))
-                # playermsg
-                # playermsg
+                playerMsg(playerIndex, 'You have been summoned by ' + getPlayerName(index) + '.', textColor.BRIGHT_BLUE)
+                playerMsg(index, getPlayerName(playerIndex) + ' has been summoned.', textColor.BRIGHT_BLUE)
                 g.connectionLogger.info(getPlayerName(index) + ' has warped ' + getPlayerName(playerIndex) + ' to self, map #' + str(getPlayerMap(index)))
             else:
-                #playermsg (not online)
+                playerMsg(index, 'Player is not online.', textColor.RED) # white?
                 return
         else:
-            #playermsg (cannot warp to self)
+            playerMsg(index, 'You cannot warp to yourself!', textColor.RED) # white?
             return
 
     def handleWarpTo(self, index, jsonData):
@@ -270,7 +290,7 @@ class DataHandler():
             return
 
         playerWarp(index, mapNum, getPlayerX(index), getPlayerY(index))
-        # playerMsg
+        playerMsg(index, 'You have been warped to map #' + str(mapNum), textColor.BRIGHT_BLUE)
         g.connectionLogger.info(getPlayerName(index) + ' warped to map #' + str(mapNum))
 
     def handleSetSprite(self, index, jsonData):

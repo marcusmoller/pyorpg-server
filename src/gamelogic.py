@@ -206,6 +206,7 @@ def joinGame(index):
     packet = json.dumps([{"packet": ServerPackets.SInGame}])
     g.conn.sendDataTo(index, packet)
 
+
 def leftGame(index):
     if TempPlayer[index].inGame:
         TempPlayer[index].inGame = False
@@ -261,37 +262,53 @@ def updateHighIndex():
 # SERVER FUNCTIONS #
 ####################
 
-def globalMsg(msg, color):
+
+def globalMsg(msg, color=(255, 0, 0)):
     packet = json.dumps([{"packet": ServerPackets.SGlobalMsg, "msg": msg, "color": color}])
     g.conn.sendDataToAll(packet)
 
-def adminMsg(msg, color):
+
+def adminMsg(msg, color=(255, 0, 0)):
     packet = json.dumps([{"packet": ServerPackets.SAdminMsg, "msg": msg, "color": color}])
 
     for i in range(g.totalPlayersOnline):
         if getPlayerAccess(playersOnline[i]) > 0:
             g.conn.sendDataTo(playersOnline[i], packet)
 
-def playerMsg(index, msg, color):
-    packet = json.dumps([{"packet": ServerPackets.SPlayerMsg, "index": index, "msg": msg, "color": color}])
+
+def playerMsg(index, msg, color=(255, 0, 0)):
+    packet = json.dumps([{"packet": ServerPackets.SPlayerMsg, "msg": msg, "color": color}])
     g.conn.sendDataTo(index, packet)
 
-def mapMsg(mapNum, msg, color):
+
+def mapMsg(mapNum, msg, color=(255, 0, 0)):
     # todo: only current map
     packet = json.dumps([{"packet": ServerPackets.SMapMsg, "msg": msg, "color": color}])
-    g.conn.sendDataToAll(packet)
+    g.conn.sendDataToMap(mapNum, packet)
+
 
 def alertMsg(index, reason):
     packet = json.dumps([{"packet": ServerPackets.SAlertMsg, "msg": reason}])
     g.conn.sendDataTo(index, packet)
 
+
 def isPlaying(index):
-    if TempPlayer[index].inGame == True:
+    if TempPlayer[index].inGame is True:
         return True
+
 
 def isLoggedIn(index):
     if len(Player[index].Login) > 0:
         return True
+
+
+def isMultiAccounts(login):
+    for i in range(g.totalPlayersOnline):
+        if str(Player[g.playersOnline[i]].Login).lower() == login.lower():
+            return True
+
+    return False
+
 
 def closeConnection(index):
     if index >= 0:
@@ -300,10 +317,12 @@ def closeConnection(index):
         g.connectionLogger.info("Connection from " + str(index) + " has been terminated.")
         clearPlayer(index)
 
+
 def createFullMapCache():
     g.serverLogger.debug('createFullMapCache()')
     for i in range(MAX_MAPS):
         mapCacheCreate(i)
+
 
 def mapCacheCreate(mapNum):
     mapData = []

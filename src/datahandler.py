@@ -65,8 +65,14 @@ class DataHandler():
         elif packetType == ClientPackets.CNeedMap:
             self.handleNeedMap(index, jsonData)
 
+        elif packetType == ClientPackets.CWhosOnline:
+            self.handleWhosOnline(index)
+
         elif packetType == ClientPackets.CRequestEditMap:
             self.handleRequestEditMap(index)
+
+        elif packetType == ClientPackets.CSetAccess:
+            self.handleSetAccess(index, jsonData)
 
         elif packetType == ClientPackets.CQuit:
             self.handleQuit(index)
@@ -376,6 +382,9 @@ class DataHandler():
         TempPlayer[index].gettingMap = False
         sendMapDone(index)
 
+    def handleWhosOnline(self, index):
+        sendWhosOnline(index)
+
     def handleRequestEditMap(self, index):
         if getPlayerAccess(index) < ADMIN_MAPPER:
             print "hacking attempt"
@@ -383,7 +392,35 @@ class DataHandler():
 
         sendEditMap(index)
 
-    def handleQuit(index):
+    def handleSetAccess(self, index, jsonData):
+        if getPlayerAccess(index) < ADMIN_CREATOR:
+            print "hacking attempt"
+            return
+
+        plrName = jsonData[0]['name']
+        access = jsonData[0]['access']
+
+        plrIndex = findPlayer(plrName)
+
+        # check for invalid access level
+        if access >= 1 or access <= 4:
+            if plrIndex is not None:
+
+                if getPlayerAccess(plrIndex) == getPlayerAccess(index):
+                    playerMsg(index, 'Invalid access level.', textColor.RED)
+                    return
+
+                if getPlayerAccess(plrIndex) <= 0:
+                    # globalMsg
+                    print "todo"
+
+                setPlayerAccess(plrIndex, access)
+                sendPlayerData(plrIndex)
+                g.connectionLogger.info(getPlayerName(index) + ' has modified ' + getPlayerName(plrIndex) + 's access.')
+            else:
+                playerMsg(index, 'Player is not online.', textColor.WHITE)
+        else:
+            playerMsg(index, 'Invalid access level.', textColor.RED)
+
+    def handleQuit(self, index):
         closeConnection(index)
-
-

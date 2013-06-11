@@ -230,7 +230,7 @@ def findPlayer(name):
                 print g.playersOnline[i]
                 return g.playersOnline[i]
 
-    return 0
+    return None
 
 
 def updateHighIndex():
@@ -353,6 +353,24 @@ def mapCacheCreate(mapNum):
                              "data3":     tempTile.data3}])
 
     MapCache[mapNum] = mapData
+
+
+def sendWhosOnline(index):
+    msg = ''
+    n = 0
+
+    for i in range(g.totalPlayersOnline):
+        if g.playersOnline[i] != index:
+            msg += getPlayerName(g.playersOnline[i]) + ', '
+            n += 1
+
+    if n == 0:
+        msg = 'There are no other players online.'
+    else:
+        msg = 'There are ' + str(n) + ' other players online: ' + msg[:-2] + '.'
+
+    playerMsg(index, msg, whoColor)
+
 
 def sendChars(index):
     packet = []

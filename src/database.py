@@ -116,7 +116,7 @@ def addAccount(index, name, password):
 
     for i in range(MAX_CHARS):
         clearChar(index, i)
-        # add 3 
+        # add 3
 
 
     saveAccount(name, password)
@@ -438,11 +438,11 @@ def getPlayerMaxVital(index, vital):
     charNum = TempPlayer[index].charNum
 
     if vital == Vitals.hp:
-        return (Player[index].char[charNum].level + (getPlayerStat(index, Stats.strength)/2)) # + smth 
+        return (Player[index].char[charNum].level + (getPlayerStat(index, Stats.strength)/2)) # + smth
     elif vital == Vitals.mp:
-        return (Player[index].char[charNum].level + (getPlayerStat(index, Stats.magic)/2)) # + smth 
+        return (Player[index].char[charNum].level + (getPlayerStat(index, Stats.magic)/2)) # + smth
     elif vital == Vitals.sp:
-        return (Player[index].char[charNum].level + (getPlayerStat(index, Stats.speed)/2)) # + smth 
+        return (Player[index].char[charNum].level + (getPlayerStat(index, Stats.speed)/2)) # + smth
 
 ''' player stats '''
 def getPlayerStat(index, stat):

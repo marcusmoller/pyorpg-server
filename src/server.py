@@ -14,6 +14,7 @@ import globalvars as g
 
 dataHandler = None
 
+
 def startServer():
     # start logging
     setupLogging()
@@ -56,19 +57,16 @@ def setupLogging():
     fh.setLevel(logging.INFO)
     fh.setFormatter(logging.Formatter('%(asctime)s (%(name)s) %(levelname)s: %(message)s'))
 
-
     g.serverLogger = logging.getLogger('server')
     g.serverLogger.setLevel(logging.INFO)
-
     g.serverLogger.addHandler(ch)
     g.serverLogger.addHandler(fh)
 
-
     g.connectionLogger = logging.getLogger('connection')
     g.connectionLogger.setLevel(logging.INFO)
-
     g.connectionLogger.addHandler(ch)
     g.connectionLogger.addHandler(fh)
+
 
 def loadGameData():
     setupDatabase()

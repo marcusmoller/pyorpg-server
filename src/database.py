@@ -63,12 +63,12 @@ class Database():
         # insert sample character 'Admin'
         self.sendQuery("INSERT INTO characters (account_id, name, class, sprite, level, exp, access, map, x, y, direction) VALUES (1, 'Admin', 0, 1, 1, 0, 4, 1, 7, 5, 0);")
 
-        # insert sample class "Warrior"
+        # insert sample classes "Warrior" and "Mage"
         self.sendQuery("INSERT INTO classes (name, sprite, stat_strength, stat_defense, stat_speed, stat_magic) VALUES ('Warrior', 0, 7, 5, 4, 2);")
+        self.sendQuery("INSERT INTO classes (name, sprite, stat_strength, stat_defense, stat_speed, stat_magic) VALUES ('Mage', 1, 2, 3, 7, 8);")
 
         self.saveChanges()
         g.serverLogger.info('Database has been created!')
-
 
     def sendQuery(self, query):
         try:

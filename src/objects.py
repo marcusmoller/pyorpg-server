@@ -33,7 +33,7 @@ class PlayerClass():
         self.name = ""
         self.sex = 0
         self.Class = 1
-        self.sprite = 1
+        self.sprite = 0
         self.level = 1
         self.exp = 0
         self.access = 0

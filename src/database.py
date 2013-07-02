@@ -56,7 +56,7 @@ class Database():
                                               name TEXT, \
                                               sprite INTEGER, \
                                               stat_strength INTEGER, stat_defense INTEGER, stat_speed INTEGER, stat_magic INTEGER);")
-        
+
         # insert sample account 'admin'
         self.sendQuery("INSERT INTO accounts (username, password) VALUES ('admin', 'admin');")
 
@@ -64,7 +64,7 @@ class Database():
         self.sendQuery("INSERT INTO characters (account_id, name, class, sprite, level, exp, access, map, x, y, direction) VALUES (1, 'Admin', 0, 1, 1, 0, 4, 1, 7, 5, 0);")
 
         # insert sample class "Warrior"
-        self.sendQuery("INSERT INTO classes (name, sprite, stat_strength, stat_defense, stat_speed, stat_magic) VALUES ('Warrior', 1, 7, 5, 4, 2);")
+        self.sendQuery("INSERT INTO classes (name, sprite, stat_strength, stat_defense, stat_speed, stat_magic) VALUES ('Warrior', 0, 7, 5, 4, 2);")
 
         self.saveChanges()
         g.serverLogger.info('Database has been created!')

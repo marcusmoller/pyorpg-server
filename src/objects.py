@@ -27,6 +27,12 @@ class Equipment():
     = range(5)
 
 
+class PlayerInvClass():
+    def __init__(self):
+        self.num = None
+        self.value = 0
+        self.dur = 0
+
 class PlayerClass():
     def __init__(self):
         # General
@@ -53,9 +59,11 @@ class PlayerClass():
         self.vitals[Vitals.mp] = 15
         self.vitals[Vitals.sp] = 20
 
-
         # equipment
         self.equipment = [None for i in range(Equipment.equipment_count)]
+
+        # inventory
+        self.inv = [PlayerInvClass() for i in range(MAX_INV)]
 
         # Position
         self.Map = 1    # None
@@ -130,6 +138,15 @@ class TempTileClass():
         self.doorOpen = 0
         self.doorTime = 0
 
+class ItemClass():
+    def __init__(self):
+        self.name = ""
+        self.pic = 1
+        self.type = None
+        self.data1 = None
+        self.data2 = None
+        self.data3 = None
+
 
 # Data initializations
 Map = [MapClass() for i in range(MAX_MAPS)]
@@ -140,4 +157,5 @@ playersOnMap = [None] * MAX_MAPS
 Player = [AccountClass() for i in range(MAX_PLAYERS)]
 TempPlayer = [TempPlayerClass() for i in range(MAX_PLAYERS)]
 
-Class = [ClassClass() for i in range(99)] #todo: dont use a fixed size, please
+Class = [ClassClass() for i in range(99)]  # todo: dont use a fixed size, please
+Item = [ItemClass() for i in range(MAX_ITEMS)]

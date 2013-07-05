@@ -57,6 +57,13 @@ class Database():
                                               sprite INTEGER, \
                                               stat_strength INTEGER, stat_defense INTEGER, stat_speed INTEGER, stat_magic INTEGER);")
 
+        # create table 'items'
+        self.sendQuery("CREATE TABLE items (id INTEGER PRIMARY KEY AUTOINCREMENT, \
+                                              name TEXT, \
+                                              pic INTEGER, \
+                                              type INTEGER, \
+                                              data1 INTEGER, data2 INTEGER, data3 INTEGER);")
+
         # insert sample account 'admin'
         self.sendQuery("INSERT INTO accounts (username, password) VALUES ('admin', 'admin');")
 
@@ -66,6 +73,10 @@ class Database():
         # insert sample classes "Warrior" and "Mage"
         self.sendQuery("INSERT INTO classes (name, sprite, stat_strength, stat_defense, stat_speed, stat_magic) VALUES ('Warrior', 0, 7, 5, 4, 2);")
         self.sendQuery("INSERT INTO classes (name, sprite, stat_strength, stat_defense, stat_speed, stat_magic) VALUES ('Mage', 1, 2, 3, 7, 8);")
+
+        # insert sample item "gold" and "Noob Helmet"
+        self.sendQuery("INSERT INTO items (name, pic, type) VALUES ('Gold', 3, 12);")
+        self.sendQuery("INSERT INTO items (name, pic, type) VALUES ('Helmet of the Noob', 17, 3);")
 
         self.saveChanges()
         g.serverLogger.info('Database has been created!')
@@ -307,7 +318,7 @@ def loadClasses():
         rows = query.fetchone()
 
         Class[i].name = rows[1]
-        Class[i].sprite = rows[2] #todo, sprite shouldnt be here
+        Class[i].sprite = rows[2] # todo, sprite shouldnt be here
         Class[i].stat[Stats.strength] = int(rows[3])
         Class[i].stat[Stats.defense] = int(rows[4])
         Class[i].stat[Stats.speed] = int(rows[5])
@@ -334,6 +345,41 @@ def getClassMaxVital(classNum, vital):
 
 def getClassStat(classNum, stat):
     return Class[i].Stat[stat]
+
+#########
+# ITEMS #
+#########
+
+def saveItems():
+    for i in range(MAX_ITEMS):
+        saveItem(i)
+
+
+def saveItem(itemNum):
+    print "todo"
+
+
+def loadItems():
+    #checkItems()
+    # get max classes
+    itemAmount = database.getNumberOfRows('items')
+
+    for i in range(0, itemAmount):
+        query = database.sendQuery("SELECT * FROM items WHERE id=%i;" % (i+1))
+        rows = query.fetchone()
+
+        Item[i].name = rows[1]
+        Item[i].pic = int(rows[2])
+        Item[i].type = int(rows[3])
+        Item[i].data1 = rows[4]
+        Item[i].data2 = rows[5]
+        Item[i].data3 = rows[6]
+
+
+def checkItems():
+    for i in range(MAX_ITEMS):
+        print "probably not necassary"
+
 
 #################
 # MAP FUNCTIONS #
@@ -460,14 +506,6 @@ def setPlayerPoints(index, points):
     Player[index].char[TempPlayer[index].charNum].statsPoints = points
 
 
-''' Player direction '''
-def getPlayerDir(index):
-    return Player[index].char[TempPlayer[index].charNum].Dir
-
-def setPlayerDir(index, direction):
-    Player[index].char[TempPlayer[index].charNum].Dir = direction
-
-
 ''' Player map '''
 def getPlayerMap(index):
     return Player[index].char[TempPlayer[index].charNum].Map
@@ -490,3 +528,32 @@ def getPlayerY(index):
 
 def setPlayerY(index, y):
     Player[index].char[TempPlayer[index].charNum].y = y
+
+
+''' Player direction '''
+def getPlayerDir(index):
+    return Player[index].char[TempPlayer[index].charNum].Dir
+
+def setPlayerDir(index, direction):
+    Player[index].char[TempPlayer[index].charNum].Dir = direction
+
+''' Player inventory '''
+def getPlayerInvItemNum(index, invSlot):
+    return Player[index].char[TempPlayer[index].charNum].inv[invSlot].num
+def setPlayerInvItemNum(index, invSlot, itemNum):
+    Player[index].char[TempPlayer[index].charNum].inv[invSlot].num = itemNum
+
+def getPlayerInvItemValue(index, invSlot):
+    return Player[index].char[TempPlayer[index].charNum].inv[invSlot].value
+def setPlayerInvItemValue(index, invSlot, itemValue):
+    Player[index].char[TempPlayer[index].charNum].inv[invSlot].value = itemValue
+
+def getPlayerInvItemDur(index, invSlot):
+    return Player[index].char[TempPlayer[index].charNum].inv[invSlot].dur
+def setPlayerInvItemDur(index, invSlot, itemDur):
+    Player[index].char[TempPlayer[index].charNum].inv[invSlot].dur = itemDur
+
+def getPlayerEquipmentSlot(index, equipmentSlot):
+    return "todo"
+def setPlayerEquipmentSlot(index, invNum, equipmentSlot):
+    print "todo"

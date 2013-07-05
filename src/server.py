@@ -31,11 +31,8 @@ def startServer():
     createFullMapCache()
 
     factory = gameServerFactory()
-
     reactor.listenTCP(2727, factory)
-
     g.conn = factory.protocol(factory)
-
     dataHandler = DataHandler()
 
     endTime = time.time()
@@ -71,10 +68,13 @@ def setupLogging():
 def loadGameData():
     setupDatabase()
 
-    g.serverLogger.info("Loading classes...")
+    g.serverLogger.info('Loading items...')
+    loadItems()
+
+    g.serverLogger.info('Loading classes...')
     loadClasses()
 
-    g.serverLogger.info("Loading maps...")
+    g.serverLogger.info('Loading maps...')
     loadMaps()
 
     for i in range(MAX_PLAYERS):

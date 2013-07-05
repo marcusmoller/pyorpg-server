@@ -190,11 +190,13 @@ def joinGame(index):
 
     # send more goodies
     sendClasses(index)
+    # sendItems
 
     for i in range(0, 3): #vital.vital_count -1
         sendVital(index, i)
 
     sendStats(index)
+    sendItems(index)
 
     # warp player to saved location
     playerWarp(index, getPlayerMap(index), getPlayerX(index), getPlayerY(index))
@@ -231,6 +233,56 @@ def findPlayer(name):
                 return g.playersOnline[i]
 
     return None
+
+def findOpenInvSlot(index, itemNum):
+    if not isPlaying(index) or itemNum < 0 or itemNum > MAX_ITEMS:
+        return
+
+    if Item[itemNum].type == ITEM_TYPE_CURRENCY:
+        # if the the item is currency, find and add to previous item
+        for i in range(MAX_INV):
+            if getPlayerInvItemNum(index, i) == itemNum:
+                return i
+
+    for i in range(1, MAX_INV):
+        # try to find an open free slot
+        if getPlayerInvItemNum(index, i) == None:
+            return i
+
+    return None
+
+def hasItem(index, itemNum):
+    if not isPlaying(index) or itemNum < 0 or itemNum > MAX_ITEMS:
+        return
+
+    for i in range(MAX_INV):
+        if getPlayerInvItemNum(index, i):
+            if Item[itemNum].type == ITEM_TYPE_CURRENCY:
+                return getPlayerInvItemValue(index, i)
+
+            else:
+                return 1
+
+
+def giveItem(index, itemNum, itemVal):
+    if not isPlaying(index) or itemNum < 0 or itemNum > MAX_ITEMS:
+        return
+
+    i = findOpenInvSlot(index, itemNum)
+
+    print i
+
+    # check if inventory is full
+    if i is not None:
+        setPlayerInvItemNum(index, i, itemNum)
+        setPlayerInvItemValue(index, i, getPlayerInvItemValue(index, i) + itemVal)
+
+        # do something if armor
+
+        sendInventoryUpdate(index, i)
+
+    else:
+        playerMsg(index, 'Your inventory is full.', textColor.BRIGHT_RED)
 
 
 def updateHighIndex():
@@ -398,6 +450,11 @@ def sendJoinMap(index):
     packet = json.dumps([{"packet": ServerPackets.SPlayerData, "index": index, "name": getPlayerName(index),  "access": getPlayerAccess(index), "sprite": getPlayerSprite(index), "map": getPlayerMap(index), "x": getPlayerX(index), "y": getPlayerY(index), "direction": getPlayerDir(index)}])
     g.conn.sendDataToMap(getPlayerMap(index), packet)
 
+
+def sendInventoryUpdate(index, invSlot):
+    packet = json.dumps([{"packet": ServerPackets.SPlayerInvUpdate, "invslot": invSlot, "itemnum": getPlayerInvItemNum(index, invSlot), "itemvalue": getPlayerInvItemValue(index, invSlot), "itemdur": getPlayerInvItemDur(index, invSlot)}])
+    g.conn.sendDataTo(index, packet)
+
 def sendVital(index, vital):
     if vital == 0:   #hp
         packet = json.dumps([{"packet": ServerPackets.SPlayerHP, "hp_max": getPlayerMaxVital(index, 0), "hp": getPlayerVital(index, 0)}])
@@ -487,6 +544,12 @@ def sendMapList(index):
     g.conn.sendDataTo(index, nPacket)
 
 
+def sendItems(index):
+    for i in range(0, MAX_ITEMS):
+        if len(Item[i].name) > 0:
+            sendUpdateItemTo(index, i)
+
+
 # (SHOULD BE IN datahandler.py)
 def sendPlayerDir(index):
     packet = json.dumps([{"packet": ServerPackets.SPlayerDir, "index": index, "direction": getPlayerDir(index)}])
@@ -497,6 +560,16 @@ def sendLeftGame(index):
     #TODO Make name non or smth
     packet = json.dumps([{"packet": ServerPackets.SPlayerData, "index": index, "sprite": 0, "name": "", "access": 0, "map": 0, "x": 0, "y": 0, "direction": 0}])
     g.conn.sendDataToAllBut(index, packet)
+
+
+def sendUpdateItemToAll(itemNum):
+    packet = json.dumps([{"packet": ServerPackets.SUpdateItem, "itemnum": itemNum, "itemname": Item[itemNum].name, "itempic": Item[itemNum].pic, "itemtype": Item[itemNum].type, "itemdata1": Item[itemNum].data1, "itemdata2": Item[itemNum].data2, "itemdata3": Item[itemNum].data3}])
+    g.conn.sendDataToAll(packet)
+
+
+def sendUpdateItemTo(index, itemNum):
+    packet = json.dumps([{"packet": ServerPackets.SUpdateItem, "itemnum": itemNum, "itemname": Item[itemNum].name, "itempic": Item[itemNum].pic, "itemtype": Item[itemNum].type, "itemdata1": Item[itemNum].data1, "itemdata2": Item[itemNum].data2, "itemdata3": Item[itemNum].data3}])
+    g.conn.sendDataTo(index, packet)
 
 
 def sendMapDone(index):

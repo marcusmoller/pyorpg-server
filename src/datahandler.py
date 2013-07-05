@@ -74,6 +74,9 @@ class DataHandler():
         elif packetType == ClientPackets.CSetAccess:
             self.handleSetAccess(index, jsonData)
 
+        elif packetType == ClientPackets.CGiveItem:
+            self.handleGiveItem(index, jsonData)
+
         elif packetType == ClientPackets.CQuit:
             self.handleQuit(index)
 
@@ -421,6 +424,19 @@ class DataHandler():
                 playerMsg(index, 'Player is not online.', textColor.WHITE)
         else:
             playerMsg(index, 'Invalid access level.', textColor.RED)
+
+    def handleGiveItem(self, index, jsonData):
+        if getPlayerAccess(index) < ADMIN_DEVELOPER:
+            print "hacking attempt"
+            return
+
+        plrName = jsonData[0]['name']
+        itemNum = jsonData[0]['itemnum']
+
+        plrIndex = findPlayer(plrName)
+
+        giveItem(plrIndex, itemNum, 1)
+
 
     def handleQuit(self, index):
         closeConnection(index)

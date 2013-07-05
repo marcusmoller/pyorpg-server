@@ -1,7 +1,24 @@
+##########################################
+##                PyORPG                ##
+##########################################
+
+
+# version constants
+CLIENT_MAJOR = 4
+CLIENT_MINOR = 0
+CLIENT_REVISION = 0
+
+########################################################
+# the values below must match with the client's values #
+########################################################
+
 # general constants
 GAME_NAME = "PyORPG"
 GAME_PORT = 2727
 MAX_PLAYERS = 70
+MAX_ITEMS = 255
+MAX_INV = 9  # 50
+MAX_LEVELS = 100
 
 # website
 GAME_WEBSITE = "https://powrtoch.org/pyorpg/"
@@ -58,6 +75,22 @@ TILE_TYPE_ITEM     = 3
 TILE_TYPE_NPCAVOID = 4
 TILE_TYPE_KEY      = 5
 TILE_TYPE_KEYOPEN  = 6
+
+# item constants
+ITEM_TYPE_NONE        = 0
+ITEM_TYPE_WEAPON      = 1
+ITEM_TYPE_ARMOR       = 2
+ITEM_TYPE_HELMET      = 3
+ITEM_TYPE_SHIELD      = 4
+ITEM_TYPE_POTIONADDHP = 5
+ITEM_TYPE_POTIONADDMP = 6
+ITEM_TYPE_POTIONADDSP = 7
+ITEM_TYPE_POTIONSUBHP = 8
+ITEM_TYPE_POTIONSUBMP = 9
+ITEM_TYPE_POTIONSUBSP = 10
+ITEM_TYPE_KEY         = 11
+ITEM_TYPE_CURRENCY    = 12
+ITEM_TYPE_SPELL       = 13
 
 # direction constants
 DIR_UP = 0

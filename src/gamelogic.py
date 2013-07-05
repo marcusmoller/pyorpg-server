@@ -229,7 +229,6 @@ def findPlayer(name):
         # dont check a name that is too small
         if len(getPlayerName(g.playersOnline[i])) >= len(name):
             if getPlayerName(g.playersOnline[i]).lower() == name.lower():
-                print g.playersOnline[i]
                 return g.playersOnline[i]
 
     return None
@@ -270,8 +269,6 @@ def giveItem(index, itemNum, itemVal):
 
     i = findOpenInvSlot(index, itemNum)
 
-    print i
-
     # check if inventory is full
     if i is not None:
         setPlayerInvItemNum(index, i, itemNum)
@@ -301,8 +298,6 @@ def updateHighIndex():
         if len(getPlayerLogin(i)) > 0:
             g.playersOnline.append(i)
             g.highIndex = i
-
-    print g.highIndex
 
     packet = json.dumps([{"packet": ServerPackets.SHighIndex, "highindex": g.highIndex}])
     g.conn.sendDataToAll(packet)

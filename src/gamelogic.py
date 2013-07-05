@@ -244,7 +244,7 @@ def findOpenInvSlot(index, itemNum):
             if getPlayerInvItemNum(index, i) == itemNum:
                 return i
 
-    for i in range(1, MAX_INV):
+    for i in range(0, MAX_INV):
         # try to find an open free slot
         if getPlayerInvItemNum(index, i) == None:
             return i

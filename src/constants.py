@@ -4,7 +4,7 @@ GAME_PORT = 2727
 MAX_PLAYERS = 70
 
 # website
-GAME_WEBSITE = "https://github.com/marcusmoller/pyorpg-server"
+GAME_WEBSITE = "https://powrtoch.org/pyorpg/"
 
 # account constants
 NAME_LENGTH = 20
@@ -41,7 +41,7 @@ sayColor       = textColor.GREY
 globalColor    = textColor.BRIGHT_BLUE
 broadcastColor = textColor.PINK
 tellColor      = textColor.BRIGHT_GREEN
-emoteColor     = textColor.BRIGHT_CYAN 
+emoteColor     = textColor.BRIGHT_CYAN
 adminColor     = textColor.BRIGHT_CYAN
 helpColor      = textColor.PINK
 whoColor       = textColor.PINK

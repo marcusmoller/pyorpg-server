@@ -461,13 +461,16 @@ def sendLeaveMap(index, mapNum):
     packet = json.dumps([{"packet": ServerPackets.SLeft, "index": index}])
     g.conn.sendDataToAllBut(index, packet)
 
+
 def sendPlayerData(index):
     packet = json.dumps([{"packet": ServerPackets.SPlayerData, "index": index, "name": getPlayerName(index), "access": getPlayerAccess(index), "sprite": getPlayerSprite(index), "map": getPlayerMap(index), "x": getPlayerX(index), "y": getPlayerY(index), "direction": getPlayerDir(index)}])
     g.conn.sendDataToMap(getPlayerMap(index), packet)
 
+
 def sendMap(index, mapNum):
     g.serverLogger.debug('sendMap()')
     g.conn.sendDataTo(index, json.dumps(MapCache[mapNum]))
+
 
 def sendMapList(index):
     packet = []
@@ -495,10 +498,12 @@ def sendLeftGame(index):
     packet = json.dumps([{"packet": ServerPackets.SPlayerData, "index": index, "sprite": 0, "name": "", "access": 0, "map": 0, "x": 0, "y": 0, "direction": 0}])
     g.conn.sendDataToAllBut(index, packet)
 
+
 def sendMapDone(index):
     g.serverLogger.debug('sendMapDone()')
     packet = json.dumps([{"packet": ServerPackets.SMapDone}])
     g.conn.sendDataTo(index, packet)
+
 
 def sendEditMap(index):
     packet = json.dumps([{"packet": ServerPackets.SEditMap}])

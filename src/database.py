@@ -76,7 +76,7 @@ class Database():
 
         # insert sample item "gold" and "Noob Helmet"
         self.sendQuery("INSERT INTO items (name, pic, type) VALUES ('Gold', 3, 12);")
-        self.sendQuery("INSERT INTO items (name, pic, type) VALUES ('Helmet of the Noob', 17, 3);")
+        self.sendQuery("INSERT INTO items (name, pic, type) VALUES ('Helmet of the Noob', 16, 3);")
 
         self.saveChanges()
         g.serverLogger.info('Database has been created!')

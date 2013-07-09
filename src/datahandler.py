@@ -71,6 +71,9 @@ class DataHandler():
         elif packetType == ClientPackets.CRequestEditMap:
             self.handleRequestEditMap(index)
 
+        elif packetType == ClientPackets.CRequestEditItem:
+            self.handleRequestEditItem(index)
+
         elif packetType == ClientPackets.CSetAccess:
             self.handleSetAccess(index, jsonData)
 
@@ -394,6 +397,13 @@ class DataHandler():
             return
 
         sendEditMap(index)
+
+    def handleRequestEditItem(self, index):
+        if getPlayerAccess(index) < ADMIN_DEVELOPER:
+            print "hacking attempt"
+            return
+
+        sendItemEditor(index)
 
     def handleSetAccess(self, index, jsonData):
         if getPlayerAccess(index) < ADMIN_CREATOR:

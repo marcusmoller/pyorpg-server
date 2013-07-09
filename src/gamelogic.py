@@ -577,4 +577,14 @@ def sendEditMap(index):
     packet = json.dumps([{"packet": ServerPackets.SEditMap}])
     g.conn.sendDataTo(index, packet)
 
-    sendMapList(index)
+    #sendMapList(index)
+
+
+def sendItemEditor(index):
+    packet = json.dumps([{"packet": ServerPackets.SItemEditor}])
+    g.conn.sendDataTo(index, packet)
+
+
+def sendEditItem(index):
+    packet = json.dumps([{"packet": ServerPackets.SEditItem}])
+    g.conn.sendDataTo(index, packet)

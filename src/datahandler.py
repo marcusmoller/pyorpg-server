@@ -74,6 +74,9 @@ class DataHandler():
         elif packetType == ClientPackets.CRequestEditItem:
             self.handleRequestEditItem(index)
 
+        elif packetType == ClientPackets.CSaveItem:
+            self.handleSaveItem(index, jsonData)
+
         elif packetType == ClientPackets.CSetAccess:
             self.handleSetAccess(index, jsonData)
 
@@ -404,6 +407,30 @@ class DataHandler():
             return
 
         sendItemEditor(index)
+
+    def handleSaveItem(self, index, jsonData):
+        if getPlayerAccess(index) < ADMIN_CREATOR:
+            print "hacking attempt"
+            return
+
+        itemNum = jsonData[0]['itemnum']
+
+        if itemNum < 0 or itemNum > MAX_ITEMS:
+            print 'hacking attempt'
+            return
+
+        # update item
+        Item[itemNum].name = jsonData[0]['itemname']
+        Item[itemNum].pic = jsonData[0]['itempic']
+        Item[itemNum].type = jsonData[0]['itemtype']
+        Item[itemNum].data1 = jsonData[0]['itemdata1']
+        Item[itemNum].data2 = jsonData[0]['itemdata2']
+        Item[itemNum].data3 = jsonData[0]['itemdata3']
+
+        # save item
+        sendUpdateItemToAll(itemNum)
+        # saveItem
+        g.connectionLogger.info(getPlayerName(index) + ' saved item #' + str(itemNum) + '.')
 
     def handleSetAccess(self, index, jsonData):
         if getPlayerAccess(index) < ADMIN_CREATOR:

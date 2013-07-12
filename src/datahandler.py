@@ -413,7 +413,7 @@ class DataHandler():
             print "hacking attempt"
             return
 
-        itemNum = jsonData[0]['itemnum']
+        itemNum = int(jsonData[0]['itemnum'])
 
         if itemNum < 0 or itemNum > MAX_ITEMS:
             print 'hacking attempt'
@@ -429,7 +429,7 @@ class DataHandler():
 
         # save item
         sendUpdateItemToAll(itemNum)
-        # saveItem
+        saveItem(itemNum)
         g.connectionLogger.info(getPlayerName(index) + ' saved item #' + str(itemNum) + '.')
 
     def handleSetAccess(self, index, jsonData):

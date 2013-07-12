@@ -205,7 +205,6 @@ def savePlayer(index):
 
     if rows == None:
         # character/player doesnt exist, create it
-        print "new character"
 
         # get account id
         query = database.sendQuery("SELECT id FROM accounts WHERE username='%s';" % getPlayerLogin(index))
@@ -213,11 +212,6 @@ def savePlayer(index):
         accountID = result[0]
 
         # save character
-        '''query = database.sendQuery("INSERT INTO characters (account_id, name, class, sprite, level, exp, access, map, x, y, direction, stats_strength, stats_defense, stats_speed, stats_magic, vital_hp, vital_mp, vital_sp) \
-                                    VALUES (%i, '%s', 1, 1, 1, 0, 0, 1, 1, 1, 0, 5, 5, 5, 5, 10, 10, 10)" \
-                                    % (accountID, getPlayerName(index)))'''
-
-        # todo: fix this
         query = database.sendQuery("INSERT INTO characters (account_id, name, class, sprite, level, exp, access, map, x, y, direction, stats_strength, stats_defense, stats_speed, stats_magic, vital_hp, vital_mp, vital_sp) \
                                                            VALUES (%i, '%s', %i, %i, %i, %i, %i, %i, %i, %i, %i, %i, %i, %i, %i, %i, %i, %i);" \
                                                            % (accountID,                \
@@ -352,11 +346,46 @@ def getClassStat(classNum, stat):
 
 def saveItems():
     for i in range(MAX_ITEMS):
-        saveItem(i)
+        if Item[i].name != '':
+            saveItem(i)
 
 
 def saveItem(itemNum):
-    print "todo"
+    # check if item already exists
+    query = database.sendQuery("SELECT * FROM items WHERE id=%i;" % itemNum)
+    rows = query.fetchone()
+
+    print itemNum
+
+    if rows == None:
+        # item doesnt exist, create it
+        query = database.sendQuery("INSERT INTO items (id, name, pic, type, data1, data2, data3) \
+                                                           VALUES (%i, '%s', %i, %i, %i, %i, %i);" \
+                                                           % (int(itemNum+1),             \
+                                                              Item[itemNum].name,  \
+                                                              Item[itemNum].pic,   \
+                                                              Item[itemNum].type,  \
+                                                              Item[itemNum].data1, \
+                                                              Item[itemNum].data2, \
+                                                              Item[itemNum].data3))
+
+    elif len(rows) > 0:
+        # item already exists, so update the item
+        query = database.sendQuery("UPDATE items SET name='%s', \
+                                                          pic=%i, \
+                                                          type=%i, \
+                                                          data1=%i, \
+                                                          data2=%i, \
+                                                          data3=%i \
+                                                          WHERE id=%i;" % (Item[itemNum].name,  \
+                                                                           Item[itemNum].pic,   \
+                                                                           Item[itemNum].type,  \
+                                                                           Item[itemNum].data1, \
+                                                                           Item[itemNum].data2, \
+                                                                           Item[itemNum].data3, \
+                                                                           int(itemNum+1)))
+
+    database.saveChanges()
 
 
 def loadItems():

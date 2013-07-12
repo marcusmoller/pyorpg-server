@@ -142,10 +142,10 @@ class ItemClass():
     def __init__(self):
         self.name = ""
         self.pic = 1
-        self.type = None
-        self.data1 = None
-        self.data2 = None
-        self.data3 = None
+        self.type = 0
+        self.data1 = 0
+        self.data2 = 0
+        self.data3 = 0
 
 
 # Data initializations

@@ -190,13 +190,17 @@ def joinGame(index):
 
     # send more goodies
     sendClasses(index)
-    # sendItems
+    sendItems(index)
+    # npc
+    # shops
+    # spells
+    sendInventory(index)
+    # worn equipment
 
-    for i in range(0, 3): #vital.vital_count -1
+    for i in range(0, Vitals.vital_count):  #vital.vital_count -1
         sendVital(index, i)
 
     sendStats(index)
-    sendItems(index)
 
     # warp player to saved location
     playerWarp(index, getPlayerMap(index), getPlayerX(index), getPlayerY(index))
@@ -445,11 +449,6 @@ def sendJoinMap(index):
     packet = json.dumps([{"packet": ServerPackets.SPlayerData, "index": index, "name": getPlayerName(index),  "access": getPlayerAccess(index), "sprite": getPlayerSprite(index), "map": getPlayerMap(index), "x": getPlayerX(index), "y": getPlayerY(index), "direction": getPlayerDir(index)}])
     g.conn.sendDataToMap(getPlayerMap(index), packet)
 
-
-def sendInventoryUpdate(index, invSlot):
-    packet = json.dumps([{"packet": ServerPackets.SPlayerInvUpdate, "invslot": invSlot, "itemnum": getPlayerInvItemNum(index, invSlot), "itemvalue": getPlayerInvItemValue(index, invSlot), "itemdur": getPlayerInvItemDur(index, invSlot)}])
-    g.conn.sendDataTo(index, packet)
-
 def sendVital(index, vital):
     if vital == 0:   #hp
         packet = json.dumps([{"packet": ServerPackets.SPlayerHP, "hp_max": getPlayerMaxVital(index, 0), "hp": getPlayerVital(index, 0)}])
@@ -543,6 +542,24 @@ def sendItems(index):
     for i in range(0, MAX_ITEMS):
         if len(Item[i].name) > 0:
             sendUpdateItemTo(index, i)
+
+
+def sendInventory(index):
+    packet = []
+    packet.append({"packet": ServerPackets.SPlayerInv})
+
+    for i in range(0, MAX_INV):
+        packet.append({"itemnum": getPlayerInvItemNum(index, i),
+                       "itemvalue": getPlayerInvItemValue(index, i),
+                       "itemdur": getPlayerInvItemDur(index, i)})
+
+    nPacket = json.dumps(packet)
+    g.conn.sendDataTo(index, nPacket)
+
+
+def sendInventoryUpdate(index, invSlot):
+    packet = json.dumps([{"packet": ServerPackets.SPlayerInvUpdate, "invslot": invSlot, "itemnum": getPlayerInvItemNum(index, invSlot), "itemvalue": getPlayerInvItemValue(index, invSlot), "itemdur": getPlayerInvItemDur(index, invSlot)}])
+    g.conn.sendDataTo(index, packet)
 
 
 # (SHOULD BE IN datahandler.py)

@@ -64,6 +64,13 @@ class Database():
                                               type INTEGER, \
                                               data1 INTEGER, data2 INTEGER, data3 INTEGER);")
 
+        # create table 'inventory'
+        self.sendQuery("CREATE TABLE inventory (id INTEGER PRIMARY KEY AUTOINCREMENT, \
+                                              character_id TEXT, \
+                                              item_id INTEGER, \
+                                              value INTEGER, \
+                                              durability INTEGER);")
+
         # insert sample account 'admin'
         self.sendQuery("INSERT INTO accounts (username, password) VALUES ('admin', 'admin');")
 
@@ -75,8 +82,11 @@ class Database():
         self.sendQuery("INSERT INTO classes (name, sprite, stat_strength, stat_defense, stat_speed, stat_magic) VALUES ('Mage', 1, 2, 3, 7, 8);")
 
         # insert sample item "gold" and "Noob Helmet"
-        self.sendQuery("INSERT INTO items (name, pic, type) VALUES ('Gold', 3, 12);")
-        self.sendQuery("INSERT INTO items (name, pic, type) VALUES ('Helmet of the Noob', 16, 3);")
+        self.sendQuery("INSERT INTO items (name, pic, type, data1, data2, data3) VALUES ('Gold', 3, 12, 0, 0, 0);")
+        self.sendQuery("INSERT INTO items (name, pic, type, data1, data2, data3) VALUES ('Helmet of the Noob', 16, 3, 5, 7, 0);")
+
+        # add item "Noob Helmet" to character 'Admin'
+        self.sendQuery("INSERT INTO inventory (character_id, item_id, value, durability) VALUES (1, 2, 1, 25);")
 
         self.saveChanges()
         g.serverLogger.info('Database has been created!')
@@ -286,6 +296,21 @@ def loadPlayer(index, name):
             Player[index].char[i].y = rows[i][10]
             Player[index].char[i].direction = rows[i][11]
 
+            # load inventory
+            charId = rows[i][0]
+
+            invQuery = database.sendQuery("SELECT * FROM inventory WHERE character_id=%i;" % charId)
+            invRow = invQuery.fetchall()
+
+            for j in range(len(invRow)):
+                try:
+                    Player[index].char[i].inv[j].num = invRow[j][2]-1
+                    Player[index].char[i].inv[j].value = invRow[j][3]
+                    Player[index].char[i].inv[j].dur = invRow[j][4]
+
+                except:
+                    break
+
         except:
             break
 
@@ -351,11 +376,11 @@ def saveItems():
 
 
 def saveItem(itemNum):
-    # check if item already exists
-    query = database.sendQuery("SELECT * FROM items WHERE id=%i;" % itemNum)
-    rows = query.fetchone()
+    # todo: rework the id part
 
-    print itemNum
+    # check if item already exists
+    query = database.sendQuery("SELECT * FROM items WHERE id=%i;" % (itemNum+1))
+    rows = query.fetchone()
 
     if rows == None:
         # item doesnt exist, create it

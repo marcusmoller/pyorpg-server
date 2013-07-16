@@ -213,6 +213,8 @@ def savePlayer(index):
     query = database.sendQuery("SELECT * FROM characters WHERE name='%s';" % getPlayerName(index))
     rows = query.fetchone()
 
+    charId = rows[0]
+
     if rows == None:
         # character/player doesnt exist, create it
 
@@ -267,6 +269,32 @@ def savePlayer(index):
                                                                                getPlayerVital(index, 1), \
                                                                                getPlayerVital(index, 2), \
                                                                                getPlayerName(index)))
+        # save inventory
+        for i in range(MAX_INV):
+            if getPlayerInvItemNum(index, i) != None:
+                # add item to inventory if its not already there
+
+                itemNum = getPlayerInvItemNum(index, i)
+
+                # check if its already there
+                invQuery = database.sendQuery("SELECT * FROM inventory WHERE (character_id=%i AND item_id=%i);" % (charId, (itemNum+1)))
+                invRows = query.fetchone()
+
+                if invRows == None:
+                    # doesnt exist so add item
+                    invQuery = database.sendQuery('INSERT INTO inventory (character_id, item_id, value, durability) \
+                                                               VALUES (%i, %i, %i, %i);' \
+                                                               % (charId, \
+                                                                  (getPlayerInvItemNum(index, i)+1),
+                                                                  getPlayerInvItemValue(index, i),
+                                                                  getPlayerInvItemDur(index, i)))
+
+                elif len(invRows) > 0:
+                    # item has already been added, update value and durability
+                    # get id
+                    rowId = invRows[0]
+                    invQuery = database.sendQuery('UPDATE inventory SET value=%i, durability=%i WHERE id=%i;' % (getPlayerInvItemValue(index, i), getPlayerInvItemDur(index, i), rowId))
+
 
     database.saveChanges()
 

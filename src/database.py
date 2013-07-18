@@ -25,6 +25,7 @@ class Database():
 
         # connect to database
         self.conn = sqlite3.connect(database)
+        self.conn.row_factory = sqlite3.Row
         self.cursor = self.conn.cursor()
 
 
@@ -213,7 +214,7 @@ def savePlayer(index):
     query = database.sendQuery("SELECT * FROM characters WHERE name='%s';" % getPlayerName(index))
     rows = query.fetchone()
 
-    charId = rows[0]
+    charId = rows['id']
 
     if rows == None:
         # character/player doesnt exist, create it
@@ -221,7 +222,7 @@ def savePlayer(index):
         # get account id
         query = database.sendQuery("SELECT id FROM accounts WHERE username='%s';" % getPlayerLogin(index))
         result = query.fetchone()
-        accountID = result[0]
+        accountID = result['id']
 
         # save character
         query = database.sendQuery("INSERT INTO characters (account_id, name, class, sprite, level, exp, access, map, x, y, direction, stats_strength, stats_defense, stats_speed, stats_magic, vital_hp, vital_mp, vital_sp) \
@@ -292,7 +293,7 @@ def savePlayer(index):
                 elif len(invRows) > 0:
                     # item has already been added, update value and durability
                     # get id
-                    rowId = invRows[0]
+                    rowId = invRows['id']
                     invQuery = database.sendQuery('UPDATE inventory SET value=%i, durability=%i WHERE id=%i;' % (getPlayerInvItemValue(index, i), getPlayerInvItemDur(index, i), rowId))
 
 
@@ -306,9 +307,9 @@ def loadPlayer(index, name):
     query = database.sendQuery("SELECT * FROM accounts WHERE username='%s';" % name)
     rows = query.fetchone()
 
-    accountID = rows[0]
-    Player[index].Login = rows[1]
-    Player[index].Password = rows[2]
+    accountID = rows['id']
+    Player[index].Login = rows['username']
+    Player[index].Password = rows['password']
 
     # fetch character details
     query = database.sendQuery("SELECT * FROM characters WHERE account_id=%i;" % accountID)
@@ -316,13 +317,13 @@ def loadPlayer(index, name):
 
     for i in range(0, MAX_CHARS):
         try:
-            Player[index].char[i].name = rows[i][2]
-            Player[index].char[i].access = rows[i][7]
-            Player[index].char[i].sprite = rows[i][4]
-            Player[index].char[i].Map = rows[i][8]
-            Player[index].char[i].x = rows[i][9]
-            Player[index].char[i].y = rows[i][10]
-            Player[index].char[i].direction = rows[i][11]
+            Player[index].char[i].name = rows[i]['name']
+            Player[index].char[i].access = rows[i]['access']
+            Player[index].char[i].sprite = rows[i]['sprite']
+            Player[index].char[i].Map = rows[i]['map']
+            Player[index].char[i].x = rows[i]['x']
+            Player[index].char[i].y = rows[i]['y']
+            Player[index].char[i].direction = rows[i]['direction']
 
             # load inventory
             charId = rows[i][0]
@@ -332,9 +333,9 @@ def loadPlayer(index, name):
 
             for j in range(len(invRow)):
                 try:
-                    Player[index].char[i].inv[j].num = invRow[j][2]-1
-                    Player[index].char[i].inv[j].value = invRow[j][3]
-                    Player[index].char[i].inv[j].dur = invRow[j][4]
+                    Player[index].char[i].inv[j].num = invRow[j]['item_id']-1
+                    Player[index].char[i].inv[j].value = invRow[j]['value']
+                    Player[index].char[i].inv[j].dur = invRow[j]['durability']
 
                 except:
                     break
@@ -364,12 +365,12 @@ def loadClasses():
         query = database.sendQuery("SELECT * FROM classes WHERE id=%i;" % (i+1))
         rows = query.fetchone()
 
-        Class[i].name = rows[1]
-        Class[i].sprite = rows[2] # todo, sprite shouldnt be here
-        Class[i].stat[Stats.strength] = int(rows[3])
-        Class[i].stat[Stats.defense] = int(rows[4])
-        Class[i].stat[Stats.speed] = int(rows[5])
-        Class[i].stat[Stats.magic] = int(rows[6])
+        Class[i].name = rows['name']
+        Class[i].sprite = rows['sprite'] # todo, sprite shouldnt be here
+        Class[i].stat[Stats.strength] = int(rows['stat_strength'])
+        Class[i].stat[Stats.defense] = int(rows['stat_defense'])
+        Class[i].stat[Stats.speed] = int(rows['stat_speed'])
+        Class[i].stat[Stats.magic] = int(rows['stat_magic'])
 
 def saveClasses():
     # todo
@@ -450,12 +451,12 @@ def loadItems():
         query = database.sendQuery("SELECT * FROM items WHERE id=%i;" % (i+1))
         rows = query.fetchone()
 
-        Item[i].name = rows[1]
-        Item[i].pic = int(rows[2])
-        Item[i].type = int(rows[3])
-        Item[i].data1 = rows[4]
-        Item[i].data2 = rows[5]
-        Item[i].data3 = rows[6]
+        Item[i].name = rows['name']
+        Item[i].pic = int(rows['pic'])
+        Item[i].type = int(rows['type'])
+        Item[i].data1 = rows['data1']
+        Item[i].data2 = rows['data2']
+        Item[i].data3 = rows['data3']
 
 
 def checkItems():

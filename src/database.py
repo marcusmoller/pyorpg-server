@@ -366,7 +366,7 @@ def loadClasses():
         rows = query.fetchone()
 
         Class[i].name = rows['name']
-        Class[i].sprite = rows['sprite'] # todo, sprite shouldnt be here
+        Class[i].sprite = rows['sprite']
         Class[i].stat[Stats.strength] = int(rows['stat_strength'])
         Class[i].stat[Stats.defense] = int(rows['stat_defense'])
         Class[i].stat[Stats.speed] = int(rows['stat_speed'])

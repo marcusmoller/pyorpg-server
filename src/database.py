@@ -28,10 +28,10 @@ class Database():
         self.conn.row_factory = sqlite3.Row
         self.cursor = self.conn.cursor()
 
-
     def createDatabase(self, database_name):
         ''' if the database haven't been created, create it '''
         self.conn = sqlite3.connect(database_name)
+        self.conn.row_factory = sqlite3.Row
         self.cursor = self.conn.cursor()
 
         # create table 'accounts'
@@ -49,6 +49,7 @@ class Database():
                                                  map INTEGER, \
                                                  x INTEGER, y INTEGER, \
                                                  direction INTEGER, \
+                                                 helmet INTEGER, armor INTEGER, weapon INTEGER, shield INTEGER, \
                                                  stats_strength INTEGER, stats_defense INTEGER, stats_speed INTEGER, stats_magic INTEGER, \
                                                  vital_hp INTEGER, vital_mp INTEGER, vital_sp INTEGER);")
 
@@ -92,9 +93,9 @@ class Database():
         self.saveChanges()
         g.serverLogger.info('Database has been created!')
 
-    def sendQuery(self, query):
+    def sendQuery(self, query, *args):
         try:
-            return self.cursor.execute(query)
+            return self.cursor.execute(query, *args)
         except sqlite3.Error, msg:
             print msg
 
@@ -225,7 +226,7 @@ def savePlayer(index):
         accountID = result['id']
 
         # save character
-        query = database.sendQuery("INSERT INTO characters (account_id, name, class, sprite, level, exp, access, map, x, y, direction, stats_strength, stats_defense, stats_speed, stats_magic, vital_hp, vital_mp, vital_sp) \
+        query = database.sendQuery("INSERT INTO characters (account_id, name, class, sprite, level, exp, access, map, x, y, direction, helmet, armor, weapon, shield, stats_strength, stats_defense, stats_speed, stats_magic, vital_hp, vital_mp, vital_sp) \
                                                            VALUES (%i, '%s', %i, %i, %i, %i, %i, %i, %i, %i, %i, %i, %i, %i, %i, %i, %i, %i);" \
                                                            % (accountID,                \
                                                               getPlayerName(index),     \
@@ -238,6 +239,10 @@ def savePlayer(index):
                                                               getPlayerX(index),        \
                                                               getPlayerY(index),        \
                                                               getPlayerDir(index),      \
+                                                              getPlayerEquipmentSlot(index, Equipment.helmet), \
+                                                              getPlayerEquipmentSlot(index, Equipment.armor), \
+                                                              getPlayerEquipmentSlot(index, Equipment.weapon), \
+                                                              getPlayerEquipmentSlot(index, Equipment.shield), \
                                                               getPlayerStat(index, 0),  \
                                                               getPlayerStat(index, 1),  \
                                                               getPlayerStat(index, 2),  \
@@ -248,20 +253,25 @@ def savePlayer(index):
 
     elif len(rows) > 0:
         # character/player exists, so update the character
-        query = database.sendQuery("UPDATE characters SET sprite=%i, \
-                                                          map=%i, \
-                                                          x=%i, \
-                                                          y=%i, \
-                                                          access=%i, \
-                                                          direction=%i, \
-                                                          stats_strength=%i, stats_defense=%i, stats_speed=%i, stats_magic=%i, \
-                                                          vital_hp=%i, vital_mp=%i, vital_sp=%i \
-                                                          WHERE name='%s';" % (getPlayerSprite(index),   \
+        query = database.sendQuery("""UPDATE characters SET sprite=?,
+                                                          map=?,
+                                                          x=?,
+                                                          y=?,
+                                                          access=?,
+                                                          direction=?,
+                                                          helmet=?, armor=?, weapon=?, shield=?,
+                                                          stats_strength=?, stats_defense=?, stats_speed=?, stats_magic=?,
+                                                          vital_hp=?, vital_mp=?, vital_sp=?
+                                                          WHERE name=?;""", (getPlayerSprite(index),
                                                                                getPlayerMap(index),      \
                                                                                getPlayerX(index),        \
                                                                                getPlayerY(index),        \
                                                                                getPlayerAccess(index),   \
                                                                                getPlayerDir(index),      \
+                                                                               getPlayerEquipmentSlot(index, Equipment.helmet), \
+                                                                               getPlayerEquipmentSlot(index, Equipment.armor), \
+                                                                               getPlayerEquipmentSlot(index, Equipment.weapon), \
+                                                                               getPlayerEquipmentSlot(index, Equipment.shield), \
                                                                                getPlayerStat(index, 0),  \
                                                                                getPlayerStat(index, 1),  \
                                                                                getPlayerStat(index, 2),  \
@@ -270,6 +280,7 @@ def savePlayer(index):
                                                                                getPlayerVital(index, 1), \
                                                                                getPlayerVital(index, 2), \
                                                                                getPlayerName(index)))
+
         # save inventory
         for i in range(MAX_INV):
             if getPlayerInvItemNum(index, i) != None:
@@ -324,6 +335,12 @@ def loadPlayer(index, name):
             Player[index].char[i].x = rows[i]['x']
             Player[index].char[i].y = rows[i]['y']
             Player[index].char[i].direction = rows[i]['direction']
+
+            # load equipment
+            Player[index].char[i].equipment[Equipment.helmet] = rows[i]['helmet']
+            Player[index].char[i].equipment[Equipment.armor] = rows[i]['armor']
+            Player[index].char[i].equipment[Equipment.weapon] = rows[i]['weapon']
+            Player[index].char[i].equipment[Equipment.shield] = rows[i]['shield']
 
             # load inventory
             charId = rows[i][0]

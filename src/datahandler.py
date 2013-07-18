@@ -263,16 +263,32 @@ class DataHandler():
 
                 sendWornEquipment(index)
 
-
             elif itemType == ITEM_TYPE_ARMOR:
-                print 'weapon'
+                if invNum != getPlayerEquipmentSlot(index, Equipment.armor):
+                    # todo: check if required stats have been met
+                    setPlayerEquipmentSlot(index, invNum, Equipment.armor)
+                else:
+                    setPlayerEquipmentSlot(index, None, Equipment.armor)
 
+                sendWornEquipment(index)
 
             elif itemType == ITEM_TYPE_WEAPON:
-                print 'todo'
+                if invNum != getPlayerEquipmentSlot(index, Equipment.weapon):
+                    # todo: check if required stats have been met
+                    setPlayerEquipmentSlot(index, invNum, Equipment.weapon)
+                else:
+                    setPlayerEquipmentSlot(index, None, Equipment.weapon)
+
+                sendWornEquipment(index)
 
             elif itemType == ITEM_TYPE_SHIELD:
-                print 'todo'
+                if invNum != getPlayerEquipmentSlot(index, Equipment.shield):
+                    # todo: check if required stats have been met
+                    setPlayerEquipmentSlot(index, invNum, Equipment.shield)
+                else:
+                    setPlayerEquipmentSlot(index, None, Equipment.shield)
+
+                sendWornEquipment(index)
 
             # todo: potions, spells, keys
 

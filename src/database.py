@@ -215,8 +215,6 @@ def savePlayer(index):
     query = database.sendQuery("SELECT * FROM characters WHERE name='%s';" % getPlayerName(index))
     rows = query.fetchone()
 
-    charId = rows['id']
-
     if rows == None:
         # character/player doesnt exist, create it
 
@@ -227,8 +225,8 @@ def savePlayer(index):
 
         # save character
         query = database.sendQuery("INSERT INTO characters (account_id, name, class, sprite, level, exp, access, map, x, y, direction, helmet, armor, weapon, shield, stats_strength, stats_defense, stats_speed, stats_magic, vital_hp, vital_mp, vital_sp) \
-                                                           VALUES (%i, '%s', %i, %i, %i, %i, %i, %i, %i, %i, %i, %i, %i, %i, %i, %i, %i, %i);" \
-                                                           % (accountID,                \
+                                                           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);", \
+                                                             (accountID,                \
                                                               getPlayerName(index),     \
                                                               getPlayerClass(index),    \
                                                               getPlayerSprite(index),   \
@@ -253,6 +251,8 @@ def savePlayer(index):
 
     elif len(rows) > 0:
         # character/player exists, so update the character
+        charId = rows['id']
+
         query = database.sendQuery("""UPDATE characters SET sprite=?,
                                                           map=?,
                                                           x=?,

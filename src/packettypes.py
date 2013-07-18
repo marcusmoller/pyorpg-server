@@ -54,6 +54,7 @@ class ServerPackets:
     SInGame,     \
     SPlayerInv,  \
     SPlayerInvUpdate, \
+    SPlayerWornEq, \
     SPlayerHP,   \
     SPlayerMP,   \
     SPlayerSP,   \
@@ -79,7 +80,7 @@ class ServerPackets:
     SMapList, \
     SLeft,       \
     SHighIndex   \
-    = range(33)
+    = range(34)
 
 
 class MessagePackets:

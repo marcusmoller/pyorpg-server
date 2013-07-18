@@ -635,7 +635,8 @@ def getPlayerInvItemDur(index, invSlot):
 def setPlayerInvItemDur(index, invSlot, itemDur):
     Player[index].char[TempPlayer[index].charNum].inv[invSlot].dur = itemDur
 
+''' player equipment '''
 def getPlayerEquipmentSlot(index, equipmentSlot):
-    return "todo"
+    return Player[index].char[TempPlayer[index].charNum].equipment[equipmentSlot]
 def setPlayerEquipmentSlot(index, invNum, equipmentSlot):
-    print "todo"
+    Player[index].char[TempPlayer[index].charNum].equipment[equipmentSlot] = invNum

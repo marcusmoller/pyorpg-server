@@ -195,7 +195,7 @@ def joinGame(index):
     # shops
     # spells
     sendInventory(index)
-    # worn equipment
+    sendWornEquipment(index)
 
     for i in range(0, Vitals.vital_count):  #vital.vital_count -1
         sendVital(index, i)
@@ -559,6 +559,11 @@ def sendInventory(index):
 
 def sendInventoryUpdate(index, invSlot):
     packet = json.dumps([{"packet": ServerPackets.SPlayerInvUpdate, "invslot": invSlot, "itemnum": getPlayerInvItemNum(index, invSlot), "itemvalue": getPlayerInvItemValue(index, invSlot), "itemdur": getPlayerInvItemDur(index, invSlot)}])
+    g.conn.sendDataTo(index, packet)
+
+
+def sendWornEquipment(index,):
+    packet = json.dumps([{"packet": ServerPackets.SPlayerWornEq, "helmet": getPlayerEquipmentSlot(index, Equipment.helmet), "armor": getPlayerEquipmentSlot(index, Equipment.armor), "weapon": getPlayerEquipmentSlot(index, Equipment.weapon), "shield": getPlayerEquipmentSlot(index, Equipment.shield)}])
     g.conn.sendDataTo(index, packet)
 
 

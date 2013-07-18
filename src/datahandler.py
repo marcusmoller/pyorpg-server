@@ -41,6 +41,9 @@ class DataHandler():
         elif packetType == ClientPackets.CPlayerDir:
             self.handlePlayerDir(index, jsonData)
 
+        elif packetType == ClientPackets.CUseItem:
+            self.handleUseItem(index, jsonData)
+
         elif packetType == ClientPackets.CAttack:
             self.handleAttack(index)
 
@@ -231,6 +234,48 @@ class DataHandler():
         direction = jsonData[0]["direction"]
         setPlayerDir(index, direction)
         sendPlayerDir(index)
+
+    def handleUseItem(self, index, jsonData):
+        invNum = jsonData[0]['invnum']
+        charNum = TempPlayer[index].charNum
+
+        # prevent cheating
+        if invNum < 0 or invNum > MAX_ITEMS:
+            print 'hacking attempt'
+            return
+
+        if charNum < 0 or charNum > MAX_CHARS:
+            print 'hacking attempt'
+            return
+
+        if getPlayerInvItemNum(index, invNum) >= 0 and getPlayerInvItemNum(index, invNum) <= MAX_ITEMS:
+            n = Item[getPlayerInvItemNum(index, invNum)].data2
+
+            # find out what item it is
+            itemType = Item[getPlayerInvItemNum(index, invNum)].type
+
+            if itemType == ITEM_TYPE_HELMET:
+                if invNum != getPlayerEquipmentSlot(index, Equipment.helmet):
+                    # todo: check if required stats have been met
+                    setPlayerEquipmentSlot(index, invNum, Equipment.helmet)
+                else:
+                    setPlayerEquipmentSlot(index, None, Equipment.helmet)
+
+                sendWornEquipment(index)
+
+
+            elif itemType == ITEM_TYPE_ARMOR:
+                print 'weapon'
+
+
+            elif itemType == ITEM_TYPE_WEAPON:
+                print 'todo'
+
+            elif itemType == ITEM_TYPE_SHIELD:
+                print 'todo'
+
+            # todo: potions, spells, keys
+
 
     def handleAttack(self, index):
         # try to attack a player

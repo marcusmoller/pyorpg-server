@@ -95,6 +95,32 @@ def attackPlayer(attacker, victim, damage):
             playerMsg(attacker, 'You hit ' + getPlayerName(victim) + ' with a ' + Item[weaponNum].name + ' for ' + str(damage) + ' hit points.', textColor.WHITE)
             playerMsg(victim, getPlayerName(attacker) + ' hit you with a ' + Item[weaponNum].name + ' for ' + str(damage) + ' hit points.', textColor.BRIGHT_RED)
 
+        # player is dead
+        # globalMsg
+
+        # calculate exp
+        exp = getPlayerExp(victim) // 10
+
+        if exp < 0:
+            exp = 0
+
+        if exp == 0:
+            playerMsg(victim, 'You lost no experience points.', textColor.BRIGHT_RED)
+            playerMsg(attacker, 'You received no experience points from that weak insignificant player.', textColor.BRIGHT_BLUE)
+
+        else:
+            setPlayerExp(victim, getPlayerExp(victim) - exp)
+            playerMsg(victim, 'You lost ' + exp + 'experience points.', textColor.BRIGHT_RED)
+
+            setPlayerExp(attacker, getPlayerExp(attacker) + exp)
+            playerMsg(attacker, 'You gained ' + exp + 'experience points for killing ' + getPlayerName(victim) + '.', textColor.BRIGHT_RED)
+
+        # check for level up
+
+        # check if target is player who died, if so set target to 0
+
+        onDeath(victim)
+
     else:
         # player doesnt die on hit, just do damage
         setPlayerVital(victim, Vitals.hp, getPlayerVital(victim, Vitals.hp) - damage)
@@ -109,7 +135,7 @@ def attackPlayer(attacker, victim, damage):
             playerMsg(attacker, 'You hit ' + getPlayerName(victim) + ' with a ' + Item[weaponNum].name + ' for ' + str(damage) + ' hit points.', textColor.WHITE)
             playerMsg(victim, getPlayerName(attacker) + ' hit you with a ' + Item[weaponNum].name + ' for ' + str(damage) + ' hit points.', textColor.BRIGHT_RED)
 
-
+    # reduce durability of weapon
 
     # reset attack timer
     TempPlayer[attacker].attackTimer = time.time()
@@ -130,7 +156,7 @@ def playerMove(index, direction, movement):
                 moved = True
         else:
             if Map[getPlayerMap(index)].up > 0:
-                playerWarp(index, Map[getPlayerMap(index)].up, getPlayerX(index), MAX_MAPY - 1) # todo, dont use -1
+                playerWarp(index, Map[getPlayerMap(index)].up, getPlayerX(index), MAX_MAPY - 1)  # todo, dont use -1
                 moved = True
 
     elif direction == DIR_DOWN:
@@ -188,6 +214,7 @@ def playerMove(index, direction, movement):
         # hacking attempt
         g.serverLogger.info("hacking attempt (playerMove)")
 
+
 def getPlayerDamage(index):
     if not isPlaying(index) or index is None or index > g.highIndex:
         return 0
@@ -203,6 +230,7 @@ def getPlayerDamage(index):
         plrDamage += Item[getPlayerInvItemNum(index, weaponSlot)].data2
 
     return plrDamage
+
 
 def getPlayerProtection(index):
     if not isPlaying(index) or index is None or index > g.highIndex:
@@ -230,6 +258,21 @@ def canPlayerCriticalHit(index):
         if n == 1:
             # calculate critical hit chance
             i = (getPlayerStat(index, Stats.strength) // 2) + (getPlayerLevel(index) // 2)
+
+            n = random.randint(1, 100)
+            if n <= i:
+                return True
+
+    return False
+
+
+def canPlayerBlockHit(index):
+    # is a shield equipped
+    if getPlayerEquipmentSlot(index, Equipment.shield) is not None:
+        n = random.randint(1, 2)
+
+        if n == 1:
+            i = (getPlayerStat(index, Stats.defense) // 2) + (getPlayerLevel(index) // 2)
 
             n = random.randint(1, 100)
             if n <= i:
@@ -371,6 +414,30 @@ def giveItem(index, itemNum, itemVal):
     else:
         playerMsg(index, 'Your inventory is full.', textColor.BRIGHT_RED)
 
+
+def onDeath(index):
+    # set hp to nothing
+    setPlayerVital(index, Vitals.hp, 0)
+
+    # drop all worn items
+    for i in range(Equipment.equipment_count):
+        if getPlayerEquipmentSlot(index, i) is not None:
+            # drop item on map
+            print "todo: drop item " + str(i)
+
+    # warp player away
+    playerWarp(index, START_MAP, START_X, START_Y)
+
+    # restore vitals
+    setPlayerVital(index, Vitals.hp, getPlayerMaxVital(index, Vitals.hp))
+    setPlayerVital(index, Vitals.mp, getPlayerMaxVital(index, Vitals.mp))
+    setPlayerVital(index, Vitals.sp, getPlayerMaxVital(index, Vitals.sp))
+    sendVital(index, Vitals.hp)
+    sendVital(index, Vitals.mp)
+    sendVital(index, Vitals.sp)
+
+    # if the player that the attacker killed was a pk (player killer) then take it away
+    # todo
 
 def updateHighIndex():
     # TODO ALOT

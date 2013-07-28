@@ -304,21 +304,28 @@ class DataHandler():
             if tempIndex != index:
                 # can we attack the player?
                 if canAttackPlayer(index, tempIndex):
-                    # todo: check if player can block hit
+                    # check if player can block the hit
+                    if not canPlayerBlockHit(tempIndex):
 
-                    # get the damage we can do
-                    if not canPlayerCriticalHit(index):
-                        # normal hit
-                        damage = getPlayerDamage(index) - getPlayerProtection(tempIndex)
+                        # get the damage we can do
+                        if not canPlayerCriticalHit(index):
+                            # normal hit
+                            damage = getPlayerDamage(index) - getPlayerProtection(tempIndex)
+
+                        else:
+                            # critical hit so add bonus
+                            n = getPlayerDamage(index)
+                            damage = n + random.randint(1, (n // 2)) + 1 - getPlayerProtection(tempIndex)
+
+                            playerMsg(index, 'You feel a surge of energy upon swinging!', textColor.BRIGHT_CYAN)
+                            playerMsg(tempIndex, getPlayerName(index) + ' swings with enormous might!', textColor.BRIGHT_CYAN)
+
+                        attackPlayer(index, tempIndex, damage)
+
                     else:
-                        # critical hit so add bonus
-                        n = getPlayerDamage(index)
-                        damage = n + random.randint(1, (n // 2)) + 1 - getPlayerProtection(tempIndex)
-
-                        playerMsg(index, 'You feel a surge of energy upon swinging!', textColor.BRIGHT_CYAN)
-                        playerMsg(tempIndex, getPlayerName(index) + ' swings with enormous might!', textColor.BRIGHT_CYAN)
-
-                    attackPlayer(index, tempIndex, damage)
+                        # player has blocked the hit
+                        playerMsg(index, getPlayerName(tempIndex) + '\'s ' + Item[getPlayerInvItemNum(tempIndex, getPlayerEquipmentSlot(tempIndex, Equipment.shield))].name + ' has blocked your hit!', textColor.BRIGHT_CYAN)
+                        playerMsg(tempIndex, 'Your ' + Item[getPlayerInvItemNum(tempIndex, getPlayerEquipmentSlot(tempIndex, Equipment.shield))].name + ' has blocked ' + getPlayerName(index) + '\'s hit!', textColor.BRIGHT_CYAN)
 
         # todo: handle attack npc
 

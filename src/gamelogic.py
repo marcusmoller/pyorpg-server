@@ -1,5 +1,6 @@
 import time
 import json
+import random
 
 from database import *
 from objects import *
@@ -88,6 +89,12 @@ def attackPlayer(attacker, victim, damage):
             # no weapon
             playerMsg(attacker, 'You hit ' + getPlayerName(victim) + ' for ' + str(damage) + ' hit points.', textColor.WHITE)
             playerMsg(victim, getPlayerName(attacker) + ' hit you for ' + str(damage) + ' hit points.', textColor.BRIGHT_RED)
+
+        else:
+            # a weapon is equipped
+            playerMsg(attacker, 'You hit ' + getPlayerName(victim) + ' with a ' + Item[weaponNum].name + ' for ' + str(damage) + ' hit points.', textColor.WHITE)
+            playerMsg(victim, getPlayerName(attacker) + ' hit you with a ' + Item[weaponNum].name + ' for ' + str(damage) + ' hit points.', textColor.BRIGHT_RED)
+
     else:
         # player doesnt die on hit, just do damage
         setPlayerVital(victim, Vitals.hp, getPlayerVital(victim, Vitals.hp) - damage)
@@ -97,6 +104,12 @@ def attackPlayer(attacker, victim, damage):
             # no weapon
             playerMsg(attacker, 'You hit ' + getPlayerName(victim) + ' for ' + str(damage) + ' hit points.', textColor.WHITE)
             playerMsg(victim, getPlayerName(attacker) + ' hit you for ' + str(damage) + ' hit points.', textColor.BRIGHT_RED)
+        else:
+            # a weapon is equipped
+            playerMsg(attacker, 'You hit ' + getPlayerName(victim) + ' with a ' + Item[weaponNum].name + ' for ' + str(damage) + ' hit points.', textColor.WHITE)
+            playerMsg(victim, getPlayerName(attacker) + ' hit you with a ' + Item[weaponNum].name + ' for ' + str(damage) + ' hit points.', textColor.BRIGHT_RED)
+
+
 
     # reset attack timer
     TempPlayer[attacker].attackTimer = time.time()
@@ -174,6 +187,56 @@ def playerMove(index, direction, movement):
     if moved == False:
         # hacking attempt
         g.serverLogger.info("hacking attempt (playerMove)")
+
+def getPlayerDamage(index):
+    if not isPlaying(index) or index is None or index > g.highIndex:
+        return 0
+
+    plrDamage = (getPlayerStat(index, Stats.strength) // 2)
+
+    if plrDamage <= 0:
+        plrDamage = 1
+
+    # check if player has a weapon equipped
+    if getPlayerEquipmentSlot(index, Equipment.weapon) is not None:
+        weaponSlot = getPlayerEquipmentSlot(index, Equipment.weapon)
+        plrDamage += Item[getPlayerInvItemNum(index, weaponSlot)].data2
+
+    return plrDamage
+
+def getPlayerProtection(index):
+    if not isPlaying(index) or index is None or index > g.highIndex:
+        return 0
+
+    armorSlot = getPlayerEquipmentSlot(index, Equipment.armor)
+    helmetSlot = getPlayerEquipmentSlot(index, Equipment.helmet)
+
+    plrProtection = (getPlayerStat(index, Stats.defense) // 5)
+
+    if armorSlot != None:
+        plrProtection += Item[getPlayerInvItemNum(index, armorSlot)].data2
+
+    if helmetSlot != None:
+        plrProtection += Item[getPlayerInvItemNum(index, helmetSlot)].data2
+
+    return plrProtection
+
+
+def canPlayerCriticalHit(index):
+    # is a weapon equipped
+    if getPlayerEquipmentSlot(index, Equipment.weapon) != None:
+        n = random.randint(1, 2)
+
+        if n == 1:
+            # calculate critical hit chance
+            i = (getPlayerStat(index, Stats.strength) // 2) + (getPlayerLevel(index) // 2)
+
+            n = random.randint(1, 100)
+            if n <= i:
+                return True
+
+    return False
+
 
 def playerWarp(index, mapNum, x, y):
     oldMap = getPlayerMap(index)

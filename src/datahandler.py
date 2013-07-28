@@ -1,3 +1,5 @@
+import random
+
 from database import *
 from packettypes import *
 from gamelogic import *
@@ -305,9 +307,18 @@ class DataHandler():
                     # todo: check if player can block hit
 
                     # get the damage we can do
-                    # todo
+                    if not canPlayerCriticalHit(index):
+                        # normal hit
+                        damage = getPlayerDamage(index) - getPlayerProtection(tempIndex)
+                    else:
+                        # critical hit so add bonus
+                        n = getPlayerDamage(index)
+                        damage = n + random.randint(1, (n // 2)) + 1 - getPlayerProtection(tempIndex)
 
-                    attackPlayer(index, tempIndex, 5)
+                        playerMsg(index, 'You feel a surge of energy upon swinging!', textColor.BRIGHT_CYAN)
+                        playerMsg(tempIndex, getPlayerName(index) + ' swings with enormous might!', textColor.BRIGHT_CYAN)
+
+                    attackPlayer(index, tempIndex, damage)
 
         # todo: handle attack npc
 

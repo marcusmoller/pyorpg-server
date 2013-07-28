@@ -11,7 +11,7 @@ MOTD = "Hello, world!"
 # maximum classes
 maxClasses = 0
 
-# Protocol 
+# Protocol
 conn = None
 
 # folders

@@ -69,11 +69,34 @@ def attackPlayer(attacker, victim, damage):
     if isPlaying(attacker) == False or isPlaying(victim) == False or damage < 0:
         return
 
-    # todo: check weapon
+    # check weapon
+    weaponNum = None
+    if getPlayerEquipmentSlot(attacker, Equipment.weapon) != None:
+        weaponNum = getPlayerInvItemNum(attacker, getPlayerEquipmentSlot(attacker, Equipment.weapon))
 
     # send packet to map so they can see person attacking
     packet = json.dumps([{"packet": ServerPackets.SAttack, "attacker": attacker}])
     g.conn.sendDataToMapBut(getPlayerMap(attacker), attacker, packet)
+
+    # reduce durability on victims equipment
+    # damageEquipment(Victim, armor)
+    # damageEquipment(Victim, helmet)
+
+    if damage >= getPlayerVital(victim, Vitals.hp):
+        # player dies on hit
+        if weaponNum is None:
+            # no weapon
+            playerMsg(attacker, 'You hit ' + getPlayerName(victim) + ' for ' + str(damage) + ' hit points.', textColor.WHITE)
+            playerMsg(victim, getPlayerName(attacker) + ' hit you for ' + str(damage) + ' hit points.', textColor.BRIGHT_RED)
+    else:
+        # player doesnt die on hit, just do damage
+        setPlayerVital(victim, Vitals.hp, getPlayerVital(victim, Vitals.hp) - damage)
+        sendVital(victim, Vitals.hp)
+
+        if weaponNum is None:
+            # no weapon
+            playerMsg(attacker, 'You hit ' + getPlayerName(victim) + ' for ' + str(damage) + ' hit points.', textColor.WHITE)
+            playerMsg(victim, getPlayerName(attacker) + ' hit you for ' + str(damage) + ' hit points.', textColor.BRIGHT_RED)
 
     # reset attack timer
     TempPlayer[attacker].attackTimer = time.time()

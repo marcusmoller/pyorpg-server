@@ -241,13 +241,13 @@ def savePlayer(index):
                                                               getPlayerEquipmentSlot(index, Equipment.armor), \
                                                               getPlayerEquipmentSlot(index, Equipment.weapon), \
                                                               getPlayerEquipmentSlot(index, Equipment.shield), \
-                                                              getPlayerStat(index, 0),  \
-                                                              getPlayerStat(index, 1),  \
-                                                              getPlayerStat(index, 2),  \
-                                                              getPlayerStat(index, 3),  \
-                                                              getPlayerVital(index, 0), \
-                                                              getPlayerVital(index, 1), \
-                                                              getPlayerVital(index, 2)))
+                                                              getPlayerStat(index, Stats.strength),  \
+                                                              getPlayerStat(index, Stats.defense),  \
+                                                              getPlayerStat(index, Stats.speed),  \
+                                                              getPlayerStat(index, Stats.magic),  \
+                                                              getPlayerVital(index, Vitals.hp), \
+                                                              getPlayerVital(index, Vitals.mp), \
+                                                              getPlayerVital(index, Vitals.sp)))
 
     elif len(rows) > 0:
         # character/player exists, so update the character
@@ -272,13 +272,13 @@ def savePlayer(index):
                                                                                getPlayerEquipmentSlot(index, Equipment.armor), \
                                                                                getPlayerEquipmentSlot(index, Equipment.weapon), \
                                                                                getPlayerEquipmentSlot(index, Equipment.shield), \
-                                                                               getPlayerStat(index, 0),  \
-                                                                               getPlayerStat(index, 1),  \
-                                                                               getPlayerStat(index, 2),  \
-                                                                               getPlayerStat(index, 3),  \
-                                                                               getPlayerVital(index, 0), \
-                                                                               getPlayerVital(index, 1), \
-                                                                               getPlayerVital(index, 2), \
+                                                                               getPlayerStat(index, Stats.strength),  \
+                                                                               getPlayerStat(index, Stats.defense),  \
+                                                                               getPlayerStat(index, Stats.speed),  \
+                                                                               getPlayerStat(index, Stats.magic),  \
+                                                                               getPlayerVital(index, Vitals.hp), \
+                                                                               getPlayerVital(index, Vitals.mp), \
+                                                                               getPlayerVital(index, Vitals.sp), \
                                                                                getPlayerName(index)))
 
         # save inventory
@@ -337,6 +337,17 @@ def loadPlayer(index, name):
             Player[index].char[i].y = rows[i]['y']
             Player[index].char[i].direction = rows[i]['direction']
 
+            # set stats
+            Player[index].char[i].stats[Stats.strength] = rows[i]['stats_strength']
+            Player[index].char[i].stats[Stats.defense] = rows[i]['stats_defense']
+            Player[index].char[i].stats[Stats.speed] = rows[i]['stats_speed']
+            Player[index].char[i].stats[Stats.magic] = rows[i]['stats_magic']
+
+            # set vitals
+            Player[index].char[i].vitals[Vitals.hp] = rows[i]['vital_hp']
+            Player[index].char[i].vitals[Vitals.mp] = rows[i]['vital_mp']
+            Player[index].char[i].vitals[Vitals.sp] = rows[i]['vital_sp']
+
             # load equipment
             Player[index].char[i].equipment[Equipment.helmet] = rows[i]['helmet']
             Player[index].char[i].equipment[Equipment.armor] = rows[i]['armor']
@@ -361,10 +372,14 @@ def loadPlayer(index, name):
         except:
             break
 
+
 def clearPlayer(index):
+    ''' resets the given index of Player array '''
     Player[index] = AccountClass()
 
+
 def clearChar(index, charNum):
+    ''' resets the given index of the character array '''
     Player[index].char[charNum] = PlayerClass()
 
 ###########
@@ -589,11 +604,11 @@ def getPlayerMaxVital(index, vital):
     charNum = TempPlayer[index].charNum
 
     if vital == Vitals.hp:
-        return (Player[index].char[charNum].level + (getPlayerStat(index, Stats.strength)/2)) # + smth
+        return (Player[index].char[charNum].level + (getPlayerStat(index, Stats.strength) // 2) + Class[Player[index].char[charNum].Class].stat[Stats.strength] * 2)
     elif vital == Vitals.mp:
-        return (Player[index].char[charNum].level + (getPlayerStat(index, Stats.magic)/2)) # + smth
+        return (Player[index].char[charNum].level + (getPlayerStat(index, Stats.magic) // 2) + Class[Player[index].char[charNum].Class].stat[Stats.magic] * 2)
     elif vital == Vitals.sp:
-        return (Player[index].char[charNum].level + (getPlayerStat(index, Stats.speed)/2)) # + smth
+        return (Player[index].char[charNum].level + (getPlayerStat(index, Stats.speed) // 2) + Class[Player[index].char[charNum].Class].stat[Stats.speed] * 2)
 
 ''' player stats '''
 def getPlayerStat(index, stat):

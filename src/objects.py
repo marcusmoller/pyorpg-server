@@ -47,17 +47,17 @@ class PlayerClass():
 
         # stats
         self.stats = [None for i in range(Stats.stat_count)]
-        self.stats[Stats.strength] = 5
-        self.stats[Stats.defense] = 6
-        self.stats[Stats.speed] = 7
-        self.stats[Stats.magic] = 8
+        self.stats[Stats.strength] = 0
+        self.stats[Stats.defense] = 0
+        self.stats[Stats.speed] = 0
+        self.stats[Stats.magic] = 0
         self.statsPoints = 0
 
         # vitals (hp, mp etc.)
         self.vitals = [None for i in range(Vitals.vital_count)]
-        self.vitals[Vitals.hp] = 10
-        self.vitals[Vitals.mp] = 15
-        self.vitals[Vitals.sp] = 20
+        self.vitals[Vitals.hp] = 0
+        self.vitals[Vitals.mp] = 0
+        self.vitals[Vitals.sp] = 0
 
         # equipment
         self.equipment = [None for i in range(Equipment.equipment_count)]

@@ -329,6 +329,7 @@ def loadPlayer(index, name):
     for i in range(0, MAX_CHARS):
         try:
             Player[index].char[i].name = rows[i]['name']
+            Player[index].char[i].Class = rows[i]['class']
             Player[index].char[i].access = rows[i]['access']
             Player[index].char[i].sprite = rows[i]['sprite']
             Player[index].char[i].Map = rows[i]['map']

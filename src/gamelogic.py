@@ -328,7 +328,7 @@ def joinGame(index):
     sendInventory(index)
     sendWornEquipment(index)
 
-    for i in range(0, Vitals.vital_count):  #vital.vital_count -1
+    for i in range(0, Vitals.vital_count):  # vital.vital_count -1
         sendVital(index, i)
 
     sendStats(index)

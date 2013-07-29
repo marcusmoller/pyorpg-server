@@ -552,6 +552,10 @@ def getPlayerLevel(index):
 def setPlayerLevel(index, level):
     Player[index].char[TempPlayer[index].charNum].level = level
 
+''' player next level '''
+def getPlayerNextLevel(index):
+    return (getPlayerLevel(index) + 1) * (getPlayerStat(index, Stats.strength) + getPlayerStat(index, Stats.defense) + getPlayerStat(index, Stats.magic) + getPlayerStat(index, Stats.speed) + getPlayerPoints(index)) * 25
+
 ''' player exp '''
 def getPlayerExp(index):
     return Player[index].char[TempPlayer[index].charNum].exp

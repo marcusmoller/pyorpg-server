@@ -80,8 +80,8 @@ def attackPlayer(attacker, victim, damage):
     g.conn.sendDataToMapBut(getPlayerMap(attacker), attacker, packet)
 
     # reduce durability on victims equipment
-    # damageEquipment(Victim, armor)
-    # damageEquipment(Victim, helmet)
+    damageEquipment(victim, Equipment.armor)
+    damageEquipment(victim, Equipment.helmet)
 
     if damage >= getPlayerVital(victim, Vitals.hp):
         # player dies on hit
@@ -96,7 +96,7 @@ def attackPlayer(attacker, victim, damage):
             playerMsg(victim, getPlayerName(attacker) + ' hit you with a ' + Item[weaponNum].name + ' for ' + str(damage) + ' hit points.', textColor.BRIGHT_RED)
 
         # player is dead
-        # globalMsg
+        globalMsg(getPlayerName(victim) + ' has been killed by ' + getPlayerName(attacker), textColor.BRIGHT_RED)
 
         # calculate exp
         exp = getPlayerExp(victim) // 10
@@ -116,8 +116,9 @@ def attackPlayer(attacker, victim, damage):
             playerMsg(attacker, 'You gained ' + exp + 'experience points for killing ' + getPlayerName(victim) + '.', textColor.BRIGHT_RED)
 
         # check for level up
+        checkPlayerLevelUp(attacker)
 
-        # check if target is player who died, if so set target to 0
+        # todo: check if target is player who died, if so set target to 0
 
         onDeath(victim)
 
@@ -136,6 +137,7 @@ def attackPlayer(attacker, victim, damage):
             playerMsg(victim, getPlayerName(attacker) + ' hit you with a ' + Item[weaponNum].name + ' for ' + str(damage) + ' hit points.', textColor.BRIGHT_RED)
 
     # reduce durability of weapon
+    damageEquipment(attacker, Equipment.weapon)
 
     # reset attack timer
     TempPlayer[attacker].attackTimer = time.time()
@@ -395,6 +397,28 @@ def hasItem(index, itemNum):
             else:
                 return 1
 
+def takeItem(index, itemNum, itemVal):
+    if not isPlaying(index) or itemNum < 0 or itemNum > MAX_ITEMS:
+        return
+
+    takeItem = False
+
+    for i in range(MAX_INV):
+        # check if the player has the item
+        if getPlayerInvItemNum(index, i) == itemNum:
+            if Item[itemNum].type == ITEM_TYPE_CURRENCY:
+                # are we trying to take away more than they have? if so, set to zero
+                if itemVal >= getPlayerInvItemValue(index, i):
+                    takeItem = True
+                else:
+                    setPlayerInvItemValue(index, i, getPlayerInvItemValue(index, i) - itemVal)
+                    sendInventoryUpdate(index, i)
+
+            else:
+                if Item[getPlayerInvItemNum(index, i)].type == ITEM_TYPE_WEAPON:
+                    print "todo more"
+
+
 
 def giveItem(index, itemNum, itemVal):
     if not isPlaying(index) or itemNum < 0 or itemNum > MAX_ITEMS:
@@ -407,12 +431,33 @@ def giveItem(index, itemNum, itemVal):
         setPlayerInvItemNum(index, i, itemNum)
         setPlayerInvItemValue(index, i, getPlayerInvItemValue(index, i) + itemVal)
 
-        # do something if armor
+        # if the item is equipment then add durability
+        if Item[itemNum].type == ITEM_TYPE_ARMOR or Item[itemNum].type == ITEM_TYPE_WEAPON or Item[itemNum].type == ITEM_TYPE_HELMET or Item[itemNum].type == ITEM_TYPE_SHIELD:
+            setPlayerInvItemDur(index, i, Item[itemNum].data1)
 
         sendInventoryUpdate(index, i)
 
     else:
         playerMsg(index, 'Your inventory is full.', textColor.BRIGHT_RED)
+
+
+def checkPlayerLevelUp(index):
+    # check if attacker got a level up
+    if getPlayerExp(index) >= getPlayerNextLevel(index):
+        expRollOver = getPlayerExp(index) - getPlayerNextLevel(index)
+        setPlayerLevel(index, getPlayerLevel(index) + 1)
+
+        # get amount of skill points to add
+        i = (getPlayerStat(index, Stats.speed) // 10)
+        if i < 1:
+            i = 1
+        elif i > 3:
+            i = 3
+
+        setPlayerPoints(index, getPlayerPoints(index) + i)
+        setPlayerExp(index, expRollOver)
+        globalMsg(getPlayerName(index) + ' has gained a level!', textColor.BRIGHT_BLUE)  # todo: brown color
+        playerMsg(index, 'You have gained a level! You now have ' + str(getPlayerPoints(index)) + ' stat points to distribute.', textColor.BRIGHT_BLUE)
 
 
 def onDeath(index):
@@ -438,6 +483,24 @@ def onDeath(index):
 
     # if the player that the attacker killed was a pk (player killer) then take it away
     # todo
+
+
+def damageEquipment(index, equipmentSlot):
+    slot = getPlayerEquipmentSlot(index, equipmentSlot)
+
+    if slot is not None:
+        setPlayerInvItemDur(index, slot, getPlayerInvItemDur(index, slot) - 1)
+
+        if getPlayerInvItemDur(index, slot) <= 0:
+            playerMsg(index, 'Your ' + Item[getPlayerInvItemNum(index, slot)].name + ' has broken.', textColor.YELLOW)
+            # takeItem
+        else:
+            if getPlayerInvItemDur(index, slot) <= 5:
+                playerMsg(index, 'Your ' + Item[getPlayerInvItemNum(index, slot)].name + ' is about to break!', textColor.YELLOW)
+
+        # todo: dont do this? too much back and forth? perhaps dont show durability at all in client
+        sendInventoryUpdate(index, slot)
+
 
 def updateHighIndex():
     # TODO ALOT

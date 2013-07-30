@@ -415,9 +415,79 @@ def takeItem(index, itemNum, itemVal):
                     sendInventoryUpdate(index, i)
 
             else:
+                # is it a weapon?
                 if Item[getPlayerInvItemNum(index, i)].type == ITEM_TYPE_WEAPON:
-                    print "todo more"
+                    if getPlayerEquipmentSlot(index, Equipment.weapon) != None:
+                        if i == getPlayerEquipmentSlot(index, Equipment.weapon):
+                            setPlayerEquipmentSlot(index, None, Equipment.weapon)
+                            sendWornEquipment(index)
+                            takeItem = True
 
+                        else:
+                            # check if the item we are taking isnt already equipped
+                            if itemNum != getPlayerInvItemNum(index, getPlayerEquipmentSlot(index, Equipment.weapon)):
+                                takeItem = True
+
+                    else:
+                        takeItem = True
+
+                elif Item[getPlayerInvItemNum(index, i)].type == ITEM_TYPE_ARMOR:
+                    if getPlayerEquipmentSlot(index, Equipment.armor) != None:
+                        if i == getPlayerEquipmentSlot(index, Equipment.armor):
+                            setPlayerEquipmentSlot(index, None, Equipment.armor)
+                            sendWornEquipment(index)
+                            takeItem = True
+
+                        else:
+                            # check if the item we are taking isnt already equipped
+                            if itemNum != getPlayerInvItemNum(index, getPlayerEquipmentSlot(index, Equipment.armor)):
+                                takeItem = True
+
+                    else:
+                        takeItem = True
+
+                elif Item[getPlayerInvItemNum(index, i)].type == ITEM_TYPE_HELMET:
+                    if getPlayerEquipmentSlot(index, Equipment.helmet) != None:
+                        if i == getPlayerEquipmentSlot(index, Equipment.helmet):
+                            setPlayerEquipmentSlot(index, None, Equipment.helmet)
+                            sendWornEquipment(index)
+                            takeItem = True
+
+                        else:
+                            # check if the item we are taking isnt already equipped
+                            if itemNum != getPlayerInvItemNum(index, getPlayerEquipmentSlot(index, Equipment.helmet)):
+                                takeItem = True
+
+                    else:
+                        takeItem = True
+
+                elif Item[getPlayerInvItemNum(index, i)].type == ITEM_TYPE_SHIELD:
+                    if getPlayerEquipmentSlot(index, Equipment.shield) != None:
+                        if i == getPlayerEquipmentSlot(index, Equipment.shield):
+                            setPlayerEquipmentSlot(index, None, Equipment.shield)
+                            sendWornEquipment(index)
+                            takeItem = True
+
+                        else:
+                            # check if the item we are taking isnt already equipped
+                            if itemNum != getPlayerInvItemNum(index, getPlayerEquipmentSlot(index, Equipment.shield)):
+                                takeItem = True
+
+                    else:
+                        takeItem = True
+
+                # check if the item isnt equipable - if it isnt, take it away
+                n = Item[getPlayerInvItemNum(index, i)].type
+                if n != ITEM_TYPE_WEAPON or n!= ITEM_TYPE_ARMOR or n != ITEM_TYPE_HELMET or n != ITEM_TYPE_SHIELD:
+                    takeItem = True
+
+                if takeItem:
+                    setPlayerInvItemNum(index, i, None)
+                    setPlayerInvItemValue(index, i, 0)
+                    setPlayerInvItemDur(index, i, 0)
+
+                    # send inventory update
+                    sendInventoryUpdate(index, i)
 
 
 def giveItem(index, itemNum, itemVal):
@@ -493,7 +563,7 @@ def damageEquipment(index, equipmentSlot):
 
         if getPlayerInvItemDur(index, slot) <= 0:
             playerMsg(index, 'Your ' + Item[getPlayerInvItemNum(index, slot)].name + ' has broken.', textColor.YELLOW)
-            # takeItem
+            takeItem(index, getPlayerInvItemNum(index, slot), 0)
         else:
             if getPlayerInvItemDur(index, slot) <= 5:
                 playerMsg(index, 'Your ' + Item[getPlayerInvItemNum(index, slot)].name + ' is about to break!', textColor.YELLOW)

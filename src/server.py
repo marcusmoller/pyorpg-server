@@ -89,7 +89,7 @@ class gameServerProtocol(LineReceiver):
 
     def connectionMade(self):
         self.factory.clients.append(self)
-        g.connectionLogger.info("CONNECTION - Connection from " + str(self.transport.getHost()))
+        g.connectionLogger.info("CONNECTION - Connection from IP: " + str(self.transport.getPeer().host))
 
     def connectionLost(self, reason):
         clientIndex = self.factory.clients.index(self)

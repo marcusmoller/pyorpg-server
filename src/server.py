@@ -102,7 +102,7 @@ class gameServerProtocol(LineReceiver):
         global dataHandler
         clientIndex = self.factory.clients.index(self)
 
-        g.connectionLogger.debug("Received data from " + str(self.transport.getHost()))
+        g.connectionLogger.debug("Received data from " + str(self.transport.getPeer().host))
         g.connectionLogger.debug(" -> " + data)
 
         dataHandler.handleData(clientIndex, data)

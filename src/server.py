@@ -38,6 +38,9 @@ def startServer():
     endTime = time.time()
     totalTime = (endTime - startTime)*1000
     g.serverLogger.info("Initialization complete. Server loaded in " + str(round(totalTime, 2)) + " ms.")
+
+    # start the server loop and the reactor
+    serverLoop()
     reactor.run()
 
 
@@ -148,6 +151,59 @@ class gameServerFactory(Factory):
         p.factory = self
         return p
 
+# server loop and timings
+clockTick = 0
+tmr500 = 0
+tmr1000 = 0
+lastUpdatePlayerVitals = 0
+lastUpdateSavePlayers = 0
+
+def serverLoop():
+    global clockTick, tmr500, tmr1000, lastUpdatePlayerVitals, lastUpdateSavePlayers
+
+    clockTick = time.time() * 1000
+
+    if clockTick > tmr500:
+        # check for disconnects
+
+        # process ai
+        tmr500 = time.time() * 1000 + 500
+
+    if clockTick > tmr1000:
+        # handle shutting down server
+
+        # handle closing doors
+
+        tmr1000 = time.time() * 1000 + 1000
+
+    # update player vitals every 5 seconds
+    if clockTick > lastUpdatePlayerVitals:
+        updatePlayerVitals()
+        lastUpdatePlayerVitals = time.time() * 1000 + 5000
+
+    # spawn map items every 5 minutes
+
+    # save players every 10 minutes
+    if clockTick > lastUpdateSavePlayers:
+        updateSavePlayers()
+        lastUpdateSavePlayers = time.time() * 1000 + 600000
+
+    # loop the serverLoop function every second
+    reactor.callLater(1./1000, serverLoop)
+
+def updatePlayerVitals():
+    for i in range(g.totalPlayersOnline):
+        if getPlayerVital(g.playersOnline[i], Vitals.hp) != getPlayerMaxVital(g.playersOnline[i], Vitals.hp):
+            setPlayerVital(g.playersOnline[i], Vitals.hp, getPlayerVital(g.playersOnline[i], Vitals.hp) + getPlayerVitalRegen(g.playersOnline[i], Vitals.hp))
+            sendVital(g.playersOnline[i], Vitals.hp)
+
+        if getPlayerVital(g.playersOnline[i], Vitals.mp) != getPlayerMaxVital(g.playersOnline[i], Vitals.mp):
+            setPlayerVital(g.playersOnline[i], Vitals.mp, getPlayerVital(g.playersOnline[i], Vitals.mp) + getPlayerVitalRegen(g.playersOnline[i], Vitals.mp))
+            sendVital(g.playersOnline[i], Vitals.mp)
+
+        if getPlayerVital(g.playersOnline[i], Vitals.sp) != getPlayerMaxVital(g.playersOnline[i], Vitals.sp):
+            setPlayerVital(g.playersOnline[i], Vitals.sp, getPlayerVital(g.playersOnline[i], Vitals.sp) + getPlayerVitalRegen(g.playersOnline[i], Vitals.sp))
+            sendVital(g.playersOnline[i], Vitals.sp)
 
 def updateSavePlayers():
     if g.totalPlayersOnline > 0:

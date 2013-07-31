@@ -350,7 +350,13 @@ def leftGame(index):
 
         savePlayer(index)
 
-        g.connectionLogger.info("Player left game")
+        # send global msg that player left game
+        if getPlayerAccess(index) <= ADMIN_MONITOR:
+            globalMsg(getPlayerName(index) + ' has left ' + GAME_NAME + '!', joinLeftColor)
+        else:
+            globalMsg(getPlayerName(index) + ' has left ' + GAME_NAME + '!', textColor.WHITE)
+
+        g.connectionLogger.info(getPlayerName(index) + ' has disconnected')
         sendLeftGame(index)
 
         g.totalPlayersOnline -= 1
@@ -528,6 +534,25 @@ def checkPlayerLevelUp(index):
         setPlayerExp(index, expRollOver)
         globalMsg(getPlayerName(index) + ' has gained a level!', textColor.BRIGHT_BLUE)  # todo: brown color
         playerMsg(index, 'You have gained a level! You now have ' + str(getPlayerPoints(index)) + ' stat points to distribute.', textColor.BRIGHT_BLUE)
+
+
+def getPlayerVitalRegen(index, vital):
+    if not isPlaying(index):
+        return 0
+
+    if vital == Vitals.hp:
+        i = (getPlayerStat(index, Stats.defense) // 2)
+
+    elif vital == Vitals.mp:
+        i = (getPlayerStat(index, Stats.magic) // 2)
+
+    elif vital == Vitals.sp:
+        i = (getPlayerStat(index, Stats.speed) // 2)
+
+    if i < 2:
+        i == 2
+
+    return i
 
 
 def onDeath(index):

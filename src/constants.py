@@ -13,12 +13,14 @@ CLIENT_REVISION = 0
 ########################################################
 
 # general constants
-GAME_NAME = "PyORPG"
-GAME_PORT = 2727
-MAX_PLAYERS = 70
-MAX_ITEMS = 255
-MAX_INV = 9  # 50
-MAX_LEVELS = 100
+GAME_NAME = "PyORPG"  # the game name
+GAME_PORT = 2727      # the game port
+MAX_PLAYERS = 70      # the maximum amount of (online) players allowed in the game
+MAX_ITEMS = 255       # the total maximum amount of items allowed in the game
+MAX_NPCS = 255        # the total maximum amount of npcs allowed in the game
+MAX_MAP_NPCS = 5      # the maximum amount of npcs allowed on a map
+MAX_INV = 9  # 50     # the amount of inventory slots
+MAX_LEVELS = 100      # the maximum player and npc level
 
 # website
 GAME_WEBSITE = "https://powrtoch.org/pyorpg/"

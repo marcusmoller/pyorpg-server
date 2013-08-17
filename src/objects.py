@@ -147,6 +147,38 @@ class ItemClass():
         self.data2 = 0
         self.data3 = 0
 
+class NPCClass():
+    def __init__(self):
+        self.name = ''
+        self.attackSay = ''
+
+        self.sprite = None
+        self.spawnSecs = None
+        self.behaviour = None
+        self.range = None
+
+        self.dropChance = None
+        self.dropItem = None
+        self.dropItemValue = None
+
+        self.stat = [None for i in range(Stats.stat_count)]
+
+class MapNPCClass():
+    def __init__(self):
+        self.num = None
+        self.target = None
+
+        self.vital = [None for i in range(Vitals.vital_count)]
+
+        self.map = None
+        self.x = None
+        self.y = None
+        self.dir = None
+
+        # server use only
+        self.spawnWait = None
+        self.attackTimer = None
+
 
 # Data initializations
 Map = [MapClass() for i in range(MAX_MAPS)]
@@ -159,3 +191,5 @@ TempPlayer = [TempPlayerClass() for i in range(MAX_PLAYERS)]
 
 Class = [ClassClass() for i in range(99)]  # todo: dont use a fixed size, please
 Item = [ItemClass() for i in range(MAX_ITEMS)]
+NPC = [NPCClass() for i in range(MAX_NPCS)]
+mapNPC = ([MapNPCClass() for i in range(MAX_MAPS)], [MapNPCClass() for i in range(MAX_MAP_NPCS)])

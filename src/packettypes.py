@@ -37,13 +37,17 @@ class ClientPackets:
     CRequestEditItem, \
     CEditItem, \
     CSaveItem, \
+    CRequestEditNpc, \
+    CEditNpc, \
+    CSaveNpc, \
     CDelete, \
     CSetAccess, \
     CGiveItem,  \
     CWhosOnline, \
     CSetMotd, \
     CQuit        \
-    = range(41)
+    = range(44)
+
 
 class ServerPackets:
     SAlertMsg,   \
@@ -63,9 +67,18 @@ class ServerPackets:
     SPlayerMove, \
     SPlayerDir,  \
     SAttack,     \
+    SNpcMove,    \
+    SNpcDir,     \
+    SNpcDead,    \
+    SNpcEditor,  \
+    SNpcAttack,  \
+    SUpdateNpc,  \
+    SEditNpc,    \
+    SSpawnNpc,   \
     SCheckForMap,\
     SMapData,    \
     SMapItemData,\
+    SMapNpcData, \
     SMapDone,    \
     SSayMsg,     \
     SGlobalMsg,  \
@@ -80,7 +93,7 @@ class ServerPackets:
     SMapList, \
     SLeft,       \
     SHighIndex   \
-    = range(34)
+    = range(43)
 
 
 class MessagePackets:

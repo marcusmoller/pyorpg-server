@@ -921,3 +921,8 @@ def sendItemEditor(index):
 def sendEditItem(index):
     packet = json.dumps([{"packet": ServerPackets.SEditItem}])
     g.conn.sendDataTo(index, packet)
+
+
+def sendNpcEditor(index):
+    packet = json.dumps([{"packet": ServerPackets.SNpcEditor}])
+    g.conn.sendDataTo(index, packet)

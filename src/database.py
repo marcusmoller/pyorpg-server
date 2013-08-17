@@ -77,7 +77,7 @@ class Database():
         self.sendQuery("INSERT INTO accounts (username, password) VALUES ('admin', 'admin');")
 
         # insert sample character 'Admin'
-        self.sendQuery("INSERT INTO characters (account_id, name, class, sprite, level, exp, access, map, x, y, direction) VALUES (1, 'Admin', 0, 1, 1, 0, 4, 1, 7, 5, 0);")
+        self.sendQuery("INSERT INTO characters (account_id, name, class, sprite, level, exp, access, map, x, y, direction, stats_strength, stats_defense, stats_speed, stats_magic, vital_hp, vital_mp, vital_sp) VALUES (1, 'Admin', 1, 1, 1, 0, 4, 1, 7, 5, 0, 2, 3, 7, 8, 4, 7, 3);")
 
         # insert sample classes "Warrior" and "Mage"
         self.sendQuery("INSERT INTO classes (name, sprite, stat_strength, stat_defense, stat_speed, stat_magic) VALUES ('Warrior', 0, 7, 5, 4, 2);")

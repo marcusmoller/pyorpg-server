@@ -25,14 +25,19 @@ def startServer():
     startTime = time.time()
 
     g.serverLogger.info("Starting server...")
-    loadGameData()
-
-    g.serverLogger.info("Creating map cache...")
-    createFullMapCache()
 
     factory = gameServerFactory()
     reactor.listenTCP(2727, factory)
     g.conn = factory.protocol(factory)
+
+    loadGameData()
+
+    g.serverLogger.info("Spawning map items...")
+    spawnAllMapsItems()
+
+    g.serverLogger.info("Creating map cache...")
+    createFullMapCache()
+
     dataHandler = DataHandler()
 
     endTime = time.time()

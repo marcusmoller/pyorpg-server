@@ -519,6 +519,15 @@ def checkMaps():
         if not os.path.isfile(g.dataFolder + "/maps/" + str(i) + ".pom"):
             saveMap(i)
 
+
+def clearMapItem(index, mapNum):
+    mapItem[mapNum][i] = MapItemClass()
+
+def clearMapItems():
+    for i in range(MAX_MAPS):
+        for j in range(MAX_MAP_ITEMS):
+            clearMapItem(j, i)
+
 def clearMap(mapNum):
     Map[mapNum].tileSet = 1
     Map[mapNum].name = ""

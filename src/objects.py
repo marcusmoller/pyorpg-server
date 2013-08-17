@@ -138,6 +138,15 @@ class TempTileClass():
         self.doorOpen = 0
         self.doorTime = 0
 
+class MapItemClass():
+    def __init__(self):
+        self.num = None
+        self.value = None
+        self.dur = None
+
+        self.x = None
+        self.y = None
+
 class ItemClass():
     def __init__(self):
         self.name = ""
@@ -192,4 +201,5 @@ TempPlayer = [TempPlayerClass() for i in range(MAX_PLAYERS)]
 Class = [ClassClass() for i in range(99)]  # todo: dont use a fixed size, please
 Item = [ItemClass() for i in range(MAX_ITEMS)]
 NPC = [NPCClass() for i in range(MAX_NPCS)]
+mapItem = ([MapItemClass() for i in range(MAX_MAPS)], [MapItemClass() for i in range(MAX_MAP_ITEMS)])
 mapNPC = ([MapNPCClass() for i in range(MAX_MAPS)], [MapNPCClass() for i in range(MAX_MAP_NPCS)])

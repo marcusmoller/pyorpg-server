@@ -70,6 +70,9 @@ class DataHandler():
         elif packetType == ClientPackets.CNeedMap:
             self.handleNeedMap(index, jsonData)
 
+        elif packetType == ClientPackets.CMapGetItem:
+            self.handleMapGetItem(index)
+
         elif packetType == ClientPackets.CWhosOnline:
             self.handleWhosOnline(index)
 
@@ -446,6 +449,14 @@ class DataHandler():
 
                 tile_i += 1
 
+        # clear map items
+        for i in range(MAX_MAP_ITEMS):            
+            spawnItemSlot(i, None, None, None, getPlayerMap(index), mapItem[getPlayerMap(index)][i].x, mapItem[getPlayerMap(index)][i].y)
+            clearMapItem(i, getPlayerMap(index))
+
+        # respawn items
+        spawnMapItems(getPlayerMap(index))
+
         # save map
         saveMap(mapNum)
         mapCacheCreate(mapNum)
@@ -459,8 +470,6 @@ class DataHandler():
                     playerWarp(index, mapNum, getPlayerX(index), getPlayerY(index))
 
 
-        # todo: ALOT!
-
     def handleNeedMap(self, index, jsonData):
         g.serverLogger.debug("handleNeedMap()")
         answer = jsonData[0]["answer"]
@@ -469,9 +478,33 @@ class DataHandler():
             # needs new revision
             sendMap(index, getPlayerMap(index))
 
+        sendMapItemsTo(index, getPlayerMap(index))
+        # sendMapNpcsTo
         sendJoinMap(index)
         TempPlayer[index].gettingMap = False
         sendMapDone(index)
+
+    def handleMapGetItem(self, index):
+        playerMapGetItem(index)
+
+    def handleMapDropItem(self, index, jsonData):
+        invNum = jsonData[0]['invnum']
+        amount = jsonData[0]['amount']
+
+        # prevent hacking
+        if invNum < 1 or invNum > MAX_INV:
+            return
+
+        if amount > getPlayerInvItemValue(index, invNum):
+            return
+
+        if Item[getPlayerInvItemNum(index, invNum)].type == ITEM_TYPE_CURRENCY:
+            # check if money and if so, make sure it wont drop to value 0
+            if amoun <= 0:
+                # hacking attemt
+                takeItem(index, getPlayerInvItemNum(index, invNum), 0)
+
+        playerMapDropItem(index, invNum, amount)
 
     def handleWhosOnline(self, index):
         sendWhosOnline(index)
@@ -562,6 +595,45 @@ class DataHandler():
         plrIndex = findPlayer(plrName)
 
         giveItem(plrIndex, itemNum, 1)
+
+
+    def handleSearch(self, index, jsonData):
+        x = jsonData[0]['x']
+        y = jsonData[0]['y']
+
+        if x < 0 or x > MAX_MAPX or y < 0 or y > MAX_MAPY:
+            return
+
+        for i in range(g.totalPlayersOnline):
+            if getPlayerMap(index) == getPlayerMap(g.playersOnline[i]):
+                if getPlayerX(g.playersOnline[i]) == x:
+                    if getPlayerY(g.playersOnline[i]) == y:
+
+                        # consider the player
+                        if g.playersOnline[i] != index:
+                            if getPlayerLevel(playersOnline[i]) >= getPlayerLevel(index) + 5:
+                                playerMsg(index, "You wouldn't stand a chance.", textColor.BRIGHT_RED)
+
+                            elif getPlayerLevel(playersOnline[i]) > getPlayerLevel(index):
+                                playerMsg(index, "This one seems to have an advantage over you.", textColor.YELLOW)
+
+                            elif getPlayerLevel(playersOnline[i]) == getPlayerLevel(index):
+                                playerMsg(index, "This would be an even fight.", textColor.WHITE)
+
+                            elif getPlayerLevel(playersOnline[i]) + 5 <= getPlayerLevel(index):
+                                playerMsg(index, "You could slaughter that player.", textColor.BRIGHT_BLUE)
+
+                            elif getPlayerLevel(playersOnline[i]) < getPlayerLevel(index):
+                                playerMsg(index, "You would have an advantage over that player.", textColor.YELLOW)
+
+                    # todo: change target
+
+        for i in range(MAX_MAP_ITEMS):
+            if mapItem[getPlayerMap(index)][i].num != None:
+                if mapItem[getPlayerMap(index)][i].x == x and mapItem[getPlayerMap(index)][i].y == y:
+                    playerMsg(index, 'You see a ' + Item[mapItem[getPlayerMap(index)][i].num].name + '.', textColor.YELLOW)
+
+
 
 
     def handleQuit(self, index):

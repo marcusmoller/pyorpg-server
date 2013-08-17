@@ -85,6 +85,7 @@ class ServerPackets:
     SAdminMsg,   \
     SPlayerMsg,  \
     SMapMsg,     \
+    SSpawnItem,  \
     SItemEditor, \
     SUpdateItem, \
     SMapKey, \
@@ -93,7 +94,7 @@ class ServerPackets:
     SMapList, \
     SLeft,       \
     SHighIndex   \
-    = range(43)
+    = range(44)
 
 
 class MessagePackets:

@@ -374,6 +374,70 @@ def findPlayer(name):
 
     return None
 
+
+def findOpenMapItemSlot(mapNum):
+    if mapNum is None or mapNum > MAX_MAPS:
+        return
+
+    for i in range(MAX_MAP_ITEMS):
+        if mapItem[mapNum][i].num is None:
+            return i
+
+def spawnItem(itemNum, itemVal, mapNum, x, y):
+    if itemNum is None or itemNum > MAX_ITEMS or mapNum is None or mapNum > MAX_MAPS:
+        return
+
+    # find open map item slot
+    i = findOpenMapItemSlot(mapNum)
+
+    spawnItemSlot(i, itemNum, itemVal, Item[itemNum].data1, mapNum, x, y)
+
+def spawnItemSlot(mapItemSlot, itemNum, itemVal, itemDur, mapNum, x, y):
+    if mapItemSlot is None or mapItemSlot > MAX_MAP_ITEMS or itemNum > MAX_ITEMS or mapNum is None or mapNum > MAX_MAPS:
+        return
+
+    i = mapItemSlot
+
+    if i != None:
+        if itemNum <= MAX_ITEMS:
+            mapItem[mapNum][i].num = itemNum
+            mapItem[mapNum][i].value = itemVal
+
+            if itemNum != None:
+                if (Item[itemNum].type >= ITEM_TYPE_WEAPON) and (Item[itemNum].type <= ITEM_TYPE_SHIELD):
+                    mapItem[mapNum][i].dur = itemDur
+                else:
+                    mapItem[mapNum][i].dur = 0
+            else:
+                mapItem[mapNum][i].dur = 0
+
+            mapItem[mapNum][i].x = x
+            mapItem[mapNum][i].y = y
+
+            packet = json.dumps([{"packet": ServerPackets.SSpawnItem, "slot": i, "itemnum": itemNum, "itemval": itemVal, "itemdur": mapItem[mapNum][i].dur, "x": x, "y": y,}])
+            g.conn.sendDataToMap(mapNum, packet)
+
+def spawnMapItems(mapNum):
+    if mapNum is None or mapNum > MAX_MAPS:
+        return
+
+    for x in range(MAX_MAPX):
+        for y in range(MAX_MAPY):
+            # check if tile type is an item or a saved tile incase someone drops something
+            if Map[mapNum].tile[x][y].type == TILE_TYPE_ITEM:
+
+                # check if currency and if they set the value to 0, set it to 1 automatically
+                if Item[Map[mapNum].tile[x][y].data1].type == ITEM_TYPE_CURRENCY and Map[mapNum].tile[x][y].data2 == 0:
+                    spawnItem(Map[mapNum].tile[x][y].data1, 1, mapNum, x, y)
+                else:
+                    spawnItem(Map[mapNum].tile[x][y].data1, Map[mapNum].tile[x][y].data2, mapNum, x, y)
+
+
+def spawnAllMapsItems():
+    for i in range(MAX_MAPS):
+        spawnMapItems(i)
+
+
 def findOpenInvSlot(index, itemNum):
     if not isPlaying(index) or itemNum < 0 or itemNum > MAX_ITEMS:
         return
@@ -515,6 +579,56 @@ def giveItem(index, itemNum, itemVal):
 
     else:
         playerMsg(index, 'Your inventory is full.', textColor.BRIGHT_RED)
+
+
+def playerMapGetItem(index):
+    if not isPlaying(index):
+        return
+
+    mapNum = getPlayerMap(index)
+
+    for i in range(MAX_MAP_ITEMS):
+        # see if theres an item here
+        if mapItem[mapNum][i].num <= MAX_ITEMS:
+            # check if item is at same location as the player
+            if mapItem[mapNum][i].x == getPlayerX(index) and mapItem[mapNum][i].y == getPlayerY(index):
+                # find open slot
+                n = findOpenInvSlot(index, mapItem[mapNum][i].num)
+
+                # open slot available?
+                if n is not None:
+                    # give item to player
+                    setPlayerInvItemNum(index, n, mapItem[mapNum][i].num)
+
+                    # is the item a currency?
+                    if Item[getPlayerInvItemNum(index, n)].type == ITEM_TYPE_CURRENCY:
+                        setPlayerInvItemValue(index, n, getPlayerInvItemValue(index, n) + mapItem[mapNum][i].value)
+                        msg = 'You picked up ' + mapItem[mapNum][i].value + ' ' + Item[getPlayerInvItemNum(index, n)].name + '.'
+
+                    else:
+                        setPlayerInvItemValue(index, n, 0)
+                        msg = 'You picked up a ' + Item[getPlayerInvItemNum(index, n)].name
+
+                    setPlayerInvItemDur(index, n, mapItem[mapNum][i].dur)
+
+                    # erase item from map
+                    mapItem[mapNum][i].num = None
+                    mapItem[mapNum][i].value = None
+                    mapItem[mapNum][i].dur = None
+                    mapItem[mapNum][i].x = None
+                    mapItem[mapNum][i].y = None
+
+                    sendInventoryUpdate(index, n)
+                    spawnItemSlot(i, None, None, None, getPlayerMap(index), None, None)
+                    playerMsg(index, msg, textColor.YELLOW)
+                    break
+
+                else:
+                    playerMsg(index, 'Your inventory is full.', textColor.BRIGHT_RED)
+                    break
+
+def playerMapDropItem(index, invNum, amount):
+    print "todo"
 
 
 def checkPlayerLevelUp(index):
@@ -848,6 +962,33 @@ def sendMapList(index):
     nPacket = json.dumps(packet)
     g.conn.sendDataTo(index, nPacket)
 
+def sendMapItemsTo(index, mapNum):
+    packet = []
+    packet.append({"packet": ServerPackets.SMapItemData})
+
+    for i in range(MAX_MAP_ITEMS):
+        packet.append({"itemnum": mapItem[mapNum][i].num,
+                       "itemval": mapItem[mapNum][i].value,
+                       "itemdur": mapItem[mapNum][i].dur,
+                       "x":       mapItem[mapNum][i].x,
+                       "y":       mapItem[mapNum][i].y})
+
+    nPacket = json.dumps(packet)
+    g.conn.sendDataTo(index, nPacket)
+
+def sendMapItemsToAll(mapNum):
+    packet = []
+    packet.append({"packet": ServerPackets.SMapItemData})
+
+    for i in range(MAX_MAP_ITEMS):
+        packet.append({"itemnum": mapItem[mapNum][i].num,
+                       "itemval": mapItem[mapNum][i].value,
+                       "itemdur": mapItem[mapNum][i].dur,
+                       "x":       mapItem[mapNum][i].x,
+                       "y":       mapItem[mapNum][i].y})
+
+    nPacket = json.dumps(packet)
+    g.conn.sendDataToMap(mapNum, nPacket)
 
 def sendItems(index):
     for i in range(0, MAX_ITEMS):

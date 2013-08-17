@@ -85,7 +85,7 @@ class Database():
 
         # insert sample item "gold" and "Noob Helmet"
         self.sendQuery("INSERT INTO items (name, pic, type, data1, data2, data3) VALUES ('Gold', 3, 12, 0, 0, 0);")
-        self.sendQuery("INSERT INTO items (name, pic, type, data1, data2, data3) VALUES ('Helmet of the Noob', 16, 3, 5, 7, 0);")
+        self.sendQuery("INSERT INTO items (name, pic, type, data1, data2, data3) VALUES ('Helmet of the Noob', 0, 3, 5, 7, 0);")
 
         # add item "Noob Helmet" to character 'Admin'
         self.sendQuery("INSERT INTO inventory (character_id, item_id, value, durability) VALUES (1, 2, 1, 25);")

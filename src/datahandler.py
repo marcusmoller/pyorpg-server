@@ -49,6 +49,9 @@ class DataHandler():
         elif packetType == ClientPackets.CAttack:
             self.handleAttack(index)
 
+        elif packetType == ClientPackets.CPlayerInfoRequest:
+            self.handlePlayerInfoRequest(index, jsonData)
+
         elif packetType == ClientPackets.CWarpMeTo:
             self.handleWarpMeTo(index, jsonData)
 
@@ -73,6 +76,12 @@ class DataHandler():
         elif packetType == ClientPackets.CMapGetItem:
             self.handleMapGetItem(index)
 
+        elif packetType == ClientPackets.CMapReport:
+            self.handleMapReport(index)
+
+        elif packetType == ClientPackets.CMapRespawn:
+            self.handleMapRespawn(index)
+
         elif packetType == ClientPackets.CWhosOnline:
             self.handleWhosOnline(index)
 
@@ -87,6 +96,9 @@ class DataHandler():
 
         elif packetType == ClientPackets.CRequestEditNpc:
             self.handleRequestEditNpc(index)
+
+        elif packetType == ClientPackets.CSaveNpc:
+            self.handleSaveNpc(index, jsonData)
 
         elif packetType == ClientPackets.CSetAccess:
             self.handleSetAccess(index, jsonData)
@@ -335,6 +347,34 @@ class DataHandler():
 
         # todo: handle attack npc
 
+    def handlePlayerInfoRequest(self, index, jsonData):
+        name = jsonData[0]['name']
+
+        i = findPlayer(name)
+
+        if i != None:
+            playerMsg(index, 'Account: ' + Player[i].Login + ', Name: ' + getPlayerName(i), textColor.BRIGHT_GREEN)
+
+            if getPlayerAccess(index) > ADMIN_MONITOR:
+                playerMsg(index, '-=- Stats for ' + getPlayerName(i) + ' -=-', textColor.BRIGHT_GREEN)
+                playerMsg(index, 'Level: ' + str(getPlayerLevel(i)) + ' EXP: ' + str(getPlayerExp(i)) + '/' + str(getPlayerNextLevel(i)), textColor.BRIGHT_GREEN)
+                playerMsg(index, 'HP: ' + str(getPlayerVital(i, Vitals.hp)) + '/' + str(getPlayerMaxVital(i, Vitals.hp)) + ' MP: ' + str(getPlayerVital(i, Vitals.mp)) + '/' + str(getPlayerMaxVital(i, Vitals.mp)) + ' SP: ' + str(getPlayerVital(i, Vitals.sp)) + '/' + str(getPlayerMaxVital(i, Vitals.sp)), textColor.BRIGHT_GREEN)
+                playerMsg(index, 'Strength: ' + str(getPlayerStat(i, Stats.strength)) + ' Defense: ' + str(getPlayerStat(i, Stats.defense)) + ' Magic: ' + str(getPlayerStat(i, Stats.magic)) + ' Speed: ' + str(getPlayerStat(i, Stats.speed)), textColor.BRIGHT_GREEN)
+
+                n = (getPlayerStat(i, Stats.strength) // 2) + (getPlayerLevel(i) // 2)
+                k = (getPlayerStat(i, Stats.defense) // 2) + (getPlayerLevel(i) // 2)
+
+                if n > 100:
+                    n = 100
+
+                if k > 100:
+                    k = 100
+
+                playerMsg(index, 'Critical Hit Chance: ' + str(n) + '%, Block Chance: ' + str(k) + '%', textColor.BRIGHT_GREEN)
+        else:
+            playerMsg(index, 'Player is not online.', textColor.WHITE)
+
+
     def handleWarpMeTo(self, index, jsonData):
         if getPlayerAccess(index) < ADMIN_MAPPER:
             print "hacking attempt"
@@ -487,6 +527,51 @@ class DataHandler():
     def handleMapGetItem(self, index):
         playerMapGetItem(index)
 
+    def handleMapReport(self, index):
+        if getPlayerAccess(index) < ADMIN_MAPPER:
+            print "hacking attempt - admin cloning"
+            return
+
+        msg = 'Free Maps: '
+        tMapStart = 1
+        tMapEnd = 1
+
+        for i in range(MAX_MAPS):
+            if len(Map[i].name) == 0:
+                tMapEnd += 1
+
+            else:
+                if tMapEnd - tMapStart > 0:
+                    msg += str(tMapStart) + '-' + str(tMapEnd-1) + ', '
+
+                tMapStart = i + 1
+                tMapEnd = i + 1
+
+        msg += str(tMapStart) + '-' + str(tMapEnd-1) + ', '
+        msg = msg[:-2] + '.'
+
+        playerMsg(index, msg, textColor.BROWN)
+
+    def handleMapRespawn(self, index):
+        if getPlayerAccess(index) < ADMIN_MAPPER:
+            print "hacking attempt - admin cloning"
+            return
+
+        # clear it all
+        for i in range(MAX_MAP_ITEMS):
+            spawnItemSlot(i, None, None, None, getPlayerMap(index), mapItem[getPlayerMap(index)][i].x, mapItem[getPlayerMap(index)][i].y)
+            clearMapItem(i, getPlayerMap(index))
+
+        # respawn
+        spawnMapItems(getPlayerMap(index))
+
+        # respawn npcs
+        # todo
+
+        playerMsg(index, 'Map respawned.', textColor.BLUE)
+        g.connectionLogger.info(getPlayerName(index) + ' has respawned map #' + str(getPlayerMap(index)) + '.')
+
+
     def handleMapDropItem(self, index, jsonData):
         invNum = jsonData[0]['invnum']
         amount = jsonData[0]['amount']
@@ -553,6 +638,33 @@ class DataHandler():
             return
 
         sendNpcEditor(index)
+
+    def handleSaveNpc(self, index, jsonData):
+        if getPlayerAccess(index) < ADMIN_DEVELOPER:
+            print "hacking attempt"
+            return
+
+        npcNum = jsonData[0]['npcnum']
+
+        if npcNum < 0 or npcNum > MAX_NPCS:
+            return
+
+        # update npc
+        NPC[npcNum].name = jsonData[0]['name']
+        NPC[npcNum].attackSay = jsonData[0]['attacksay']
+        NPC[npcNum].sprite = jsonData[0]['sprite']
+        NPC[npcNum].behaviour = jsonData[0]['behavior']
+        NPC[npcNum].range = jsonData[0]['range']
+
+        NPC[npcNum].stat[Stats.strength] = jsonData[0]['strength']
+        NPC[npcNum].stat[Stats.defense] = jsonData[0]['defense']
+        NPC[npcNum].stat[Stats.magic] = jsonData[0]['magic']
+        NPC[npcNum].stat[Stats.speed] = jsonData[0]['speed']
+
+        # save it
+        sendUpdateNpcToAll(npcNum)
+        #saveNpc(npcNum)
+        g.connectionLogger.info(getPlayerName(index) + ' saved NPC #' + str(npcNum) + '.')
 
     def handleSetAccess(self, index, jsonData):
         if getPlayerAccess(index) < ADMIN_CREATOR:

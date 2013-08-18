@@ -161,10 +161,11 @@ clockTick = 0
 tmr500 = 0
 tmr1000 = 0
 lastUpdatePlayerVitals = 0
+lastUpdateMapSpawnItems = 0
 lastUpdateSavePlayers = 0
 
 def serverLoop():
-    global clockTick, tmr500, tmr1000, lastUpdatePlayerVitals, lastUpdateSavePlayers
+    global clockTick, tmr500, tmr1000, lastUpdatePlayerVitals, lastUpdateSavePlayers, lastUpdateMapSpawnItems
 
     clockTick = time.time() * 1000
 
@@ -187,6 +188,9 @@ def serverLoop():
         lastUpdatePlayerVitals = time.time() * 1000 + 5000
 
     # spawn map items every 5 minutes
+    if clockTick > lastUpdateMapSpawnItems:
+        updateMapSpawnItems()
+        lastUpdateMapSpawnItems = time.time() * 1000 + 300000
 
     # save players every 10 minutes
     if clockTick > lastUpdateSavePlayers:
@@ -209,6 +213,19 @@ def updatePlayerVitals():
         if getPlayerVital(g.playersOnline[i], Vitals.sp) != getPlayerMaxVital(g.playersOnline[i], Vitals.sp):
             setPlayerVital(g.playersOnline[i], Vitals.sp, getPlayerVital(g.playersOnline[i], Vitals.sp) + getPlayerVitalRegen(g.playersOnline[i], Vitals.sp))
             sendVital(g.playersOnline[i], Vitals.sp)
+
+def updateMapSpawnItems():
+    for i in range(MAX_MAPS):
+        # make sure no one is on the map when it respawns
+        if not playersOnMap[i]:
+            # clear unnecassary junk
+            for j in range(MAX_MAP_ITEMS):
+                clearMapItem(j, i)
+
+            # spawn items
+            spawnMapItems(i)
+            sendMapItemsToAll(i)
+
 
 def updateSavePlayers():
     if g.totalPlayersOnline > 0:

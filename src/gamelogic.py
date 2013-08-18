@@ -1063,6 +1063,14 @@ def sendEditItem(index):
     packet = json.dumps([{"packet": ServerPackets.SEditItem}])
     g.conn.sendDataTo(index, packet)
 
+def sendUpdateNpcToAll(npcNum):
+    packet = json.dumps([{"packet": ServerPackets.SUpdateNpc, 'npcnum': npcNum, 'name': NPC[npcNum].name, 'sprite': NPC[npcNum].sprite}])
+    g.conn.sendDataToAll(packet)
+
+def sendUpdateNpcTo(index, npcNum):
+    packet = json.dumps([{"packet": ServerPackets.SUpdateNpc, 'npcnum': npcNum, 'name': NPC[npcNum].name, 'sprite': NPC[npcNum].sprite}])
+    g.conn.sendDataTo(index, packet)
+
 
 def sendNpcEditor(index):
     packet = json.dumps([{"packet": ServerPackets.SNpcEditor}])

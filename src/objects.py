@@ -201,5 +201,5 @@ TempPlayer = [TempPlayerClass() for i in range(MAX_PLAYERS)]
 Class = [ClassClass() for i in range(99)]  # todo: dont use a fixed size, please
 Item = [ItemClass() for i in range(MAX_ITEMS)]
 NPC = [NPCClass() for i in range(MAX_NPCS)]
-mapItem = ([MapItemClass() for i in range(MAX_MAPS)], [MapItemClass() for i in range(MAX_MAP_ITEMS)])
-mapNPC = ([MapNPCClass() for i in range(MAX_MAPS)], [MapNPCClass() for i in range(MAX_MAP_NPCS)])
+mapItem = [[MapItemClass() for i in range(MAX_MAP_ITEMS)] for j in range(MAX_MAPS)]
+mapNPC = [[MapNPCClass() for i in range(MAX_MAP_NPCS)] for j in range(MAX_MAPS)]

@@ -521,7 +521,7 @@ def checkMaps():
 
 
 def clearMapItem(index, mapNum):
-    mapItem[mapNum][i] = MapItemClass()
+    mapItem[mapNum][index] = MapItemClass()
 
 def clearMapItems():
     for i in range(MAX_MAPS):
@@ -531,7 +531,7 @@ def clearMapItems():
 def clearMap(mapNum):
     Map[mapNum].tileSet = 1
     Map[mapNum].name = ""
-    playersOnMap[mapNum] = 0
+    playersOnMap[mapNum] = None
     MapCache[mapNum] = ""
 
 def clearMaps():

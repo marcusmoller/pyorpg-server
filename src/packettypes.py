@@ -29,6 +29,7 @@ class ClientPackets:
     CRequestNewMap, \
     CMapData,    \
     CNeedMap,    \
+    CMapReport,  \
     CMapRespawn, \
     CMapGetItem, \
     CMapRespawn, \
@@ -46,7 +47,7 @@ class ClientPackets:
     CWhosOnline, \
     CSetMotd, \
     CQuit        \
-    = range(44)
+    = range(45)
 
 
 class ServerPackets:

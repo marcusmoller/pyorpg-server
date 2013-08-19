@@ -35,6 +35,9 @@ def startServer():
     g.serverLogger.info("Spawning map items...")
     spawnAllMapsItems()
 
+    g.serverLogger.info('Spawning map NPCs...')
+    spawnAllMapNpcs()
+
     g.serverLogger.info("Creating map cache...")
     createFullMapCache()
 
@@ -75,6 +78,9 @@ def setupLogging():
 
 def loadGameData():
     setupDatabase()
+
+    g.serverLogger.info('Loading NPCs...')
+    loadNpcs()
 
     g.serverLogger.info('Loading items...')
     loadItems()

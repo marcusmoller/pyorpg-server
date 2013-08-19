@@ -300,10 +300,6 @@ def playerWarp(index, mapNum, x, y):
     packet = json.dumps([{"packet": ServerPackets.SCheckForMap, "mapnum": mapNum, "revision": Map[mapNum].revision}])
     g.conn.sendDataTo(index, packet)
 
-
-    #packet = json.dumps([{"packet": ServerPackets.SPlayerMove, "index": index, "x": getPlayerX(index), "y": getPlayerY(index), "direction": getPlayerDir(index), "moving": 0}])
-    #g.conn.sendDataToAllBut(index, packet)
-
 def joinGame(index):
     TempPlayer[index].inGame = True
 
@@ -322,7 +318,7 @@ def joinGame(index):
     # send more goodies
     sendClasses(index)
     sendItems(index)
-    # npc
+    sendNpcs(index)
     # shops
     # spells
     sendInventory(index)
@@ -437,6 +433,52 @@ def spawnAllMapsItems():
     for i in range(MAX_MAPS):
         spawnMapItems(i)
 
+def spawnNpc(mapNpcNum, mapNum):
+    if mapNpcNum < 0 or mapNpcNum > MAX_MAP_NPCS or mapNum < 0 or mapNum > MAX_MAPS:
+        return
+
+    npcNum = Map[mapNum].npc[mapNpcNum]
+
+    if npcNum is not None:
+        mapNPC[mapNum][mapNpcNum].num = npcNum
+        mapNPC[mapNum][mapNpcNum].target = None
+
+        mapNPC[mapNum][mapNpcNum].vital[Vitals.hp] = 10 #todo
+        mapNPC[mapNum][mapNpcNum].vital[Vitals.mp] = 7 #todo
+        mapNPC[mapNum][mapNpcNum].vital[Vitals.sp] = 5 #todo
+
+        mapNPC[mapNum][mapNpcNum].dir = random.randint(0, 3)
+
+        for i in range(100):
+            x = random.randint(0, MAX_MAPX-1)
+            y = random.randint(0, MAX_MAPY-1)
+
+            # check if tile is walkable
+            if Map[mapNum].tile[x][y].type == TILE_TYPE_WALKABLE:
+                mapNPC[mapNum][mapNpcNum].x = x
+                mapNPC[mapNum][mapNpcNum].y = y
+                spawned = True
+
+        # didn't spawn, so now we'll just try to find a free tile
+        if not spawned:
+            for x in range(MAX_MAPX):
+                for y in range(MAX_MAPY):
+                    if Map[mapNum].tile[x][y].type == TILE_TYPE_WALKABLE:
+                        mapNPC[mapNum][mapNpcNum].x = x
+                        mapNPC[mapNum][mapNpcNum].y = y
+                        spawned = True
+
+        # if we succeded, then send it to everybody
+        if spawned:
+            sendNpcSpawn(mapNpcNum, mapNum)
+
+def spawnMapNpcs(mapNum):
+    for i in range(MAX_MAP_NPCS):
+        spawnNpc(i, mapNum)
+
+def spawnAllMapNpcs():
+    for i in range(MAX_MAPS):
+        spawnMapNpcs(i)
 
 def findOpenInvSlot(index, itemNum):
     if not isPlaying(index) or itemNum < 0 or itemNum > MAX_ITEMS:
@@ -990,6 +1032,34 @@ def sendMapItemsToAll(mapNum):
     nPacket = json.dumps(packet)
     g.conn.sendDataToMap(mapNum, nPacket)
 
+
+def sendMapNpcsTo(index, mapNum):
+    packet = []
+    packet.append({"packet": ServerPackets.SMapNpcData})
+
+    for i in range(MAX_MAP_NPCS):
+        packet.append({"num": mapNPC[mapNum][i].num,
+                       "x":   mapNPC[mapNum][i].x,
+                       "y":   mapNPC[mapNum][i].y,
+                       "dir": mapNPC[mapNum][i].dir})
+
+    nPacket = json.dumps(packet)
+    g.conn.sendDataTo(index, nPacket)
+
+
+def sendMapNpcsToMap(mapNum):
+    packet = []
+    packet.append({"packet": ServerPackets.SMapNpcData})
+
+    for i in range(MAX_MAP_NPCS):
+        packet.append({"num": mapNPC[mapNum][i].num,
+                       "x":   mapNPC[mapNum][i].x,
+                       "y":   mapNPC[mapNum][i].y,
+                       "dir": mapNPC[mapNum][i].dir})
+
+    nPacket = json.dumps(packet)
+    g.conn.sendDataToMap(mapNum, nPacket)
+
 def sendItems(index):
     for i in range(0, MAX_ITEMS):
         if len(Item[i].name) > 0:
@@ -1062,6 +1132,15 @@ def sendItemEditor(index):
 def sendEditItem(index):
     packet = json.dumps([{"packet": ServerPackets.SEditItem}])
     g.conn.sendDataTo(index, packet)
+
+def sendNpcs(index):
+    for i in range(MAX_NPCS):
+        if len(NPC[i].name) > 0:
+            sendUpdateNpcTo(index, i)
+
+def sendNpcSpawn(mapNpcNum, mapNum):
+    packet = json.dumps([{"packet": ServerPackets.SSpawnNpc, 'mapnpcnum': mapNpcNum, 'num': mapNPC[mapNum][mapNpcNum].num, 'x': mapNPC[mapNum][mapNpcNum].x, 'y': mapNPC[mapNum][mapNpcNum].y, 'dir': mapNPC[mapNum][mapNpcNum].dir}])
+    g.conn.sendDataToMap(mapNum, packet)
 
 def sendUpdateNpcToAll(npcNum):
     packet = json.dumps([{"packet": ServerPackets.SUpdateNpc, 'npcnum': npcNum, 'name': NPC[npcNum].name, 'sprite': NPC[npcNum].sprite}])

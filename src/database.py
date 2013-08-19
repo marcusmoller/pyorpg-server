@@ -73,6 +73,18 @@ class Database():
                                               value INTEGER, \
                                               durability INTEGER);")
 
+        # create table 'npcs'
+        self.sendQuery("CREATE TABLE npcs (id INTEGER PRIMARY KEY AUTOINCREMENT, \
+                                                 name TEXT, \
+                                                 sprite INTEGER, \
+                                                 attack_say TEXT, \
+                                                 spawn_secs INTEGER, \
+                                                 behavior INTEGER, \
+                                                 range INTEGER, \
+                                                 drop_chance INTEGER, drop_item INTEGER, drop_item_value INTEGER,  \
+                                                 stat_strength INTEGER, stat_defense INTEGER, stat_speed INTEGER, stat_magic INTEGER);")
+
+
         # insert sample account 'admin'
         self.sendQuery("INSERT INTO accounts (username, password) VALUES ('admin', 'admin');")
 
@@ -497,6 +509,95 @@ def checkItems():
         print "probably not necassary"
 
 
+# NPC
+
+def saveNpc(npcNum):
+    # todo: rework the id part
+
+    # check if npc already exists
+    query = database.sendQuery("SELECT * FROM npcs WHERE id=%i;" % (npcNum+1))
+    rows = query.fetchone()
+
+    if rows == None:
+        # npc doesnt exist, create it
+        query = database.sendQuery("INSERT INTO npcs (id, name, sprite, attack_say, spawn_secs, behavior, range, drop_chance, drop_item, drop_item_value, stat_strength, stat_defense, stat_magic, stat_speed) \
+                                                           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);", \
+                                                                (int(npcNum+1), \
+                                                                NPC[npcNum].name,  \
+                                                                NPC[npcNum].sprite,   \
+                                                                NPC[npcNum].attackSay,  \
+                                                                NPC[npcNum].spawnSecs, \
+                                                                NPC[npcNum].behaviour, \
+                                                                NPC[npcNum].range, \
+                                                                NPC[npcNum].dropChance, \
+                                                                NPC[npcNum].dropItem, \
+                                                                NPC[npcNum].dropItemValue, \
+                                                                NPC[npcNum].stat[Stats.strength], \
+                                                                NPC[npcNum].stat[Stats.defense], \
+                                                                NPC[npcNum].stat[Stats.magic], \
+                                                                NPC[npcNum].stat[Stats.speed]))
+
+    elif len(rows) > 0:
+        # npc already exists, so update the npc
+        query = database.sendQuery("UPDATE npcs SET name=?, \
+                                                          sprite=?, \
+                                                          attack_say=?, \
+                                                          spawn_secs=?, \
+                                                          behavior=?, \
+                                                          range=?, \
+                                                          drop_chance=?, \
+                                                          drop_item=?, \
+                                                          drop_item_value=?, \
+                                                          stat_strength=?, \
+                                                          stat_defense=?, \
+                                                          stat_magic=?, \
+                                                          stat_speed=? \
+                                                          WHERE id=?;", (NPC[npcNum].name,  \
+                                                                           NPC[npcNum].sprite,   \
+                                                                           NPC[npcNum].attackSay,  \
+                                                                           NPC[npcNum].spawnSecs, \
+                                                                           NPC[npcNum].behaviour, \
+                                                                           NPC[npcNum].range, \
+                                                                           NPC[npcNum].dropChance, \
+                                                                           NPC[npcNum].dropItem, \
+                                                                           NPC[npcNum].dropItemValue, \
+                                                                           NPC[npcNum].stat[Stats.strength], \
+                                                                           NPC[npcNum].stat[Stats.defense], \
+                                                                           NPC[npcNum].stat[Stats.magic], \
+                                                                           NPC[npcNum].stat[Stats.speed], \
+                                                                           int(npcNum+1)))
+
+    database.saveChanges()
+
+def saveNpcs():
+    for i in range(MAX_NPCS):
+        saveNpcs(i)
+
+
+def loadNpcs():
+    npcAmount = database.getNumberOfRows('npcs')
+
+    for i in range(0, npcAmount):
+        query = database.sendQuery("SELECT * FROM npcs WHERE id=%i;" % (i+1))
+        rows = query.fetchone()
+
+        NPC[i].name = rows['name']
+        NPC[i].attackSay = rows['attack_say']
+        NPC[i].sprite = int(rows['sprite'])
+        NPC[i].spawnSecs = int(rows['spawn_secs'])
+        NPC[i].behavior = int(rows['behavior'])
+        NPC[i].range = int(rows['range'])
+
+        NPC[i].dropChance = int(rows['drop_chance'])
+        NPC[i].dropItem = int(rows['drop_item'])
+        NPC[i].dropItemValue = int(rows['drop_item_value'])
+
+        NPC[i].stat[Stats.strength] = int(rows['stat_strength'])
+        NPC[i].stat[Stats.defense] = int(rows['stat_defense'])
+        NPC[i].stat[Stats.magic] = int(rows['stat_magic'])
+        NPC[i].stat[Stats.speed] = int(rows['stat_speed'])
+
+
 #################
 # MAP FUNCTIONS #
 #################
@@ -527,6 +628,14 @@ def clearMapItems():
     for i in range(MAX_MAPS):
         for j in range(MAX_MAP_ITEMS):
             clearMapItem(j, i)
+
+def clearMapNpc(index, mapNum):
+    mapNPC[mapNum][index] = MapNPCClass()
+
+def clearMapNpcs():
+    for i in range(MAX_MAPS):
+        for j in range(MAX_MAP_NPCS):
+            clearMapNpc(j, i)
 
 def clearMap(mapNum):
     Map[mapNum].tileSet = 1

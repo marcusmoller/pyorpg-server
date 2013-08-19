@@ -132,6 +132,7 @@ class MapClass():
         self.bootY = 0
 
         self.tile = [[TileClass() for i in range(MAX_MAPY)] for i in range(MAX_MAPX)]
+        self.npc = [None for i in range(MAX_MAP_NPCS)]
 
 class TempTileClass():
     def __init__(self):

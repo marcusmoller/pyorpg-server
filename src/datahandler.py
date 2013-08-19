@@ -489,6 +489,15 @@ class DataHandler():
 
                 tile_i += 1
 
+        for i in range(MAX_MAP_NPCS):
+            Map[mapNum].npc[i] = jsonData[tile_i][0]['npcnum']
+            clearMapNpc(i, mapNum)
+
+            tile_i += 1
+
+        sendMapNpcsToMap(mapNum)
+        spawnMapNpcs(mapNum)
+
         # clear map items
         for i in range(MAX_MAP_ITEMS):            
             spawnItemSlot(i, None, None, None, getPlayerMap(index), mapItem[getPlayerMap(index)][i].x, mapItem[getPlayerMap(index)][i].y)
@@ -566,7 +575,8 @@ class DataHandler():
         spawnMapItems(getPlayerMap(index))
 
         # respawn npcs
-        # todo
+        for i in range(MAX_MAP_NPCS):
+            spawnNpc(i, getPlayerMap(index))
 
         playerMsg(index, 'Map respawned.', textColor.BLUE)
         g.connectionLogger.info(getPlayerName(index) + ' has respawned map #' + str(getPlayerMap(index)) + '.')
@@ -656,6 +666,10 @@ class DataHandler():
         NPC[npcNum].behaviour = jsonData[0]['behavior']
         NPC[npcNum].range = jsonData[0]['range']
 
+        NPC[npcNum].dropChance = jsonData[0]['dropchance']
+        NPC[npcNum].dropItem = jsonData[0]['dropitem']
+        NPC[npcNum].dropItemValue = jsonData[0]['dropitemval']
+
         NPC[npcNum].stat[Stats.strength] = jsonData[0]['strength']
         NPC[npcNum].stat[Stats.defense] = jsonData[0]['defense']
         NPC[npcNum].stat[Stats.magic] = jsonData[0]['magic']
@@ -663,7 +677,7 @@ class DataHandler():
 
         # save it
         sendUpdateNpcToAll(npcNum)
-        #saveNpc(npcNum)
+        saveNpc(npcNum)
         g.connectionLogger.info(getPlayerName(index) + ' saved NPC #' + str(npcNum) + '.')
 
     def handleSetAccess(self, index, jsonData):

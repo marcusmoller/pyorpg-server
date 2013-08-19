@@ -1002,6 +1002,9 @@ def mapCacheCreate(mapNum):
                              "data2":     tempTile.data2, \
                              "data3":     tempTile.data3}])
 
+    for i in range(MAX_MAP_NPCS):
+        mapData.append([{"npc": Map[mapNum].npc[i]}])
+
     MapCache[mapNum] = mapData
 
 

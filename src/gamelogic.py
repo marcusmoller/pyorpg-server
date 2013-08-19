@@ -480,6 +480,138 @@ def spawnAllMapNpcs():
     for i in range(MAX_MAPS):
         spawnMapNpcs(i)
 
+def canNpcMove(mapNum, mapNpcNum, direction):
+    if mapNum < 0 or mapNum > MAX_MAPS or mapNpcNum < 0 or mapNpcNum > MAX_MAP_NPCS or direction < DIR_UP or direction > DIR_RIGHT:
+        return
+
+    x = mapNPC[mapNum][mapNpcNum].x
+    y = mapNPC[mapNum][mapNpcNum].y
+
+    if direction == DIR_UP:
+        if y > 0:
+            n = Map[mapNum].tile[x][y-1].type
+
+            # check to make sure tile is walkable
+            if n != TILE_TYPE_WALKABLE:
+                return False
+
+            # make sure player is not in the way
+            for i in range(g.totalPlayersOnline):
+                if getPlayerMap(g.playersOnline[i]) == mapNum:
+                    if getPlayerX(g.playersOnline[i]) == mapNPC[mapNum][mapNpcNum].x:
+                        if getPlayerY(g.playersOnline[i]) == mapNPC[mapNum][mapNpcNum].y-1:
+                            return False
+
+            # make sure npc is not in the way
+            for i in range(MAX_MAP_NPCS):
+                if i != mapNpcNum:
+                    if mapNPC[mapNum][i].num != None:
+                        if mapNPC[mapNum][i].x == mapNPC[mapNum][mapNpcNum].x:
+                            if mapNPC[mapNum][i].y == mapNPC[mapNum][mapNpcNum].y-1:
+                                return False
+        else:
+            return False
+
+    elif direction == DIR_DOWN:
+        if y < MAX_MAPY-1:
+            n = Map[mapNum].tile[x][y+1].type
+
+            # check to make sure tile is walkable
+            if n != TILE_TYPE_WALKABLE:
+                return False
+
+            # make sure player is not in the way
+            for i in range(g.totalPlayersOnline):
+                if getPlayerMap(g.playersOnline[i]) == mapNum:
+                    if getPlayerX(g.playersOnline[i]) == mapNPC[mapNum][mapNpcNum].x:
+                        if getPlayerY(g.playersOnline[i]) == mapNPC[mapNum][mapNpcNum].y+1:
+                            return False
+
+            # make sure npc is not in the way
+            for i in range(MAX_MAP_NPCS):
+                if i != mapNpcNum:
+                    if mapNPC[mapNum][i].num != None:
+                        if mapNPC[mapNum][i].x == mapNPC[mapNum][mapNpcNum].x:
+                            if mapNPC[mapNum][i].y == mapNPC[mapNum][mapNpcNum].y+1:
+                                return False
+        else:
+            return False
+
+    elif direction == DIR_LEFT:
+        if x > 0:
+            n = Map[mapNum].tile[x-1][y].type
+
+            # check to make sure tile is walkable
+            if n != TILE_TYPE_WALKABLE:
+                return False
+
+            # make sure player is not in the way
+            for i in range(g.totalPlayersOnline):
+                if getPlayerMap(g.playersOnline[i]) == mapNum:
+                    if getPlayerX(g.playersOnline[i]) == mapNPC[mapNum][mapNpcNum].x-1:
+                        if getPlayerY(g.playersOnline[i]) == mapNPC[mapNum][mapNpcNum].y:
+                            return False
+
+            # make sure npc is not in the way
+            for i in range(MAX_MAP_NPCS):
+                if i != mapNpcNum:
+                    if mapNPC[mapNum][i].num != None:
+                        if mapNPC[mapNum][i].x == mapNPC[mapNum][mapNpcNum].x-1:
+                            if mapNPC[mapNum][i].y == mapNPC[mapNum][mapNpcNum].y:
+                                return False
+        else:
+            return False
+
+    elif direction == DIR_RIGHT:
+        if x < MAX_MAPX-1:
+            n = Map[mapNum].tile[x+1][y].type
+
+            # check to make sure tile is walkable
+            if n != TILE_TYPE_WALKABLE:
+                return False
+
+            # make sure player is not in the way
+            for i in range(g.totalPlayersOnline):
+                if getPlayerMap(g.playersOnline[i]) == mapNum:
+                    if getPlayerX(g.playersOnline[i]) == mapNPC[mapNum][mapNpcNum].x+1:
+                        if getPlayerY(g.playersOnline[i]) == mapNPC[mapNum][mapNpcNum].y:
+                            return False
+
+            # make sure npc is not in the way
+            for i in range(MAX_MAP_NPCS):
+                if i != mapNpcNum:
+                    if mapNPC[mapNum][i].num != None:
+                        if mapNPC[mapNum][i].x == mapNPC[mapNum][mapNpcNum].x+1:
+                            if mapNPC[mapNum][i].y == mapNPC[mapNum][mapNpcNum].y:
+                                return False
+        else:
+            return False
+
+    return True
+
+def npcMove(mapNum, mapNpcNum, direction, movement):
+    if mapNum < 0 or mapNum > MAX_MAPS or mapNpcNum < 0 or mapNpcNum > MAX_MAP_NPCS or direction < DIR_UP or direction > DIR_RIGHT:
+        return
+
+    mapNPC[mapNum][mapNpcNum].dir = direction
+
+    if direction == DIR_UP:
+        mapNPC[mapNum][mapNpcNum].y -= 1
+        sendNpcMove(mapNpcNum, movement, mapNum)
+
+    elif direction == DIR_DOWN:
+        mapNPC[mapNum][mapNpcNum].y += 1
+        sendNpcMove(mapNpcNum, movement, mapNum)
+
+    elif direction == DIR_LEFT:
+        mapNPC[mapNum][mapNpcNum].x -= 1
+        sendNpcMove(mapNpcNum, movement, mapNum)
+
+    elif direction == DIR_RIGHT:
+        mapNPC[mapNum][mapNpcNum].x += 1
+        sendNpcMove(mapNpcNum, movement, mapNum)
+
+
 def findOpenInvSlot(index, itemNum):
     if not isPlaying(index) or itemNum < 0 or itemNum > MAX_ITEMS:
         return
@@ -1140,6 +1272,10 @@ def sendNpcs(index):
 
 def sendNpcSpawn(mapNpcNum, mapNum):
     packet = json.dumps([{"packet": ServerPackets.SSpawnNpc, 'mapnpcnum': mapNpcNum, 'num': mapNPC[mapNum][mapNpcNum].num, 'x': mapNPC[mapNum][mapNpcNum].x, 'y': mapNPC[mapNum][mapNpcNum].y, 'dir': mapNPC[mapNum][mapNpcNum].dir}])
+    g.conn.sendDataToMap(mapNum, packet)
+
+def sendNpcMove(mapNpcNum, movement, mapNum):
+    packet = json.dumps([{"packet": ServerPackets.SNpcMove, 'mapnpcnum': mapNpcNum, 'x': mapNPC[mapNum][mapNpcNum].x, 'y': mapNPC[mapNum][mapNpcNum].y, 'dir': mapNPC[mapNum][mapNpcNum].dir, 'movement': movement}])
     g.conn.sendDataToMap(mapNum, packet)
 
 def sendUpdateNpcToAll(npcNum):

@@ -528,10 +528,13 @@ class DataHandler():
             sendMap(index, getPlayerMap(index))
 
         sendMapItemsTo(index, getPlayerMap(index))
-        # sendMapNpcsTo
+        sendMapNpcsTo(index, getPlayerMap(index))
         sendJoinMap(index)
         TempPlayer[index].gettingMap = False
+
         sendMapDone(index)
+
+        # todo: senddoordata
 
     def handleMapGetItem(self, index):
         playerMapGetItem(index)
@@ -699,8 +702,7 @@ class DataHandler():
                     return
 
                 if getPlayerAccess(plrIndex) <= 0:
-                    # globalMsg
-                    print "todo"
+                    globalMsg(getPlayerName(index) + ' has been blessed with administrative access.', textColor.BRIGHT_BLUE)
 
                 setPlayerAccess(plrIndex, access)
                 sendPlayerData(plrIndex)

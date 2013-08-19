@@ -179,6 +179,8 @@ def serverLoop():
         # check for disconnects
 
         # process ai
+        updateNpcAi()
+
         tmr500 = time.time() * 1000 + 500
 
     if clockTick > tmr1000:
@@ -205,6 +207,38 @@ def serverLoop():
 
     # loop the serverLoop function every second
     reactor.callLater(1./1000, serverLoop)
+
+def updateNpcAi():
+    for i in range(MAX_MAPS):
+        if playersOnMap[i] == 1:
+            tickCount = time.time()
+
+            for j in range(MAX_MAP_NPCS):
+                npcNum = mapNPC[i][j].num
+
+                # attacking on sight
+
+                # npc walking/targetting
+                if Map[i].npc[j] != None:
+                    if mapNPC[i][j] != None:
+                        target = mapNPC[i][j].target
+
+                        # check if its time for the npc to walk
+                        if NPC[npcNum].behaviour != NPC_BEHAVIOUR_SHOPKEEPER:
+
+                            # check if following a player
+                            if target != None:
+                                print "todo npc follow player"
+
+                            else:
+                                k = random.randint(0, 3)
+
+                                if k == 1:
+                                    k = random.randint(0, 3)
+
+                                    if canNpcMove(i, j, k):
+                                        npcMove(i, j, k, MOVING_WALKING)
+
 
 def updatePlayerVitals():
     for i in range(g.totalPlayersOnline):

@@ -206,7 +206,7 @@ def serverLoop():
         lastUpdateSavePlayers = time.time() * 1000 + 600000
 
     # loop the serverLoop function every second
-    reactor.callLater(1./1000, serverLoop)
+    reactor.callLater(1, serverLoop)
 
 def updateNpcAi():
     for i in range(MAX_MAPS):

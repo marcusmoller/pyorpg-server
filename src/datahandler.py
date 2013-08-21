@@ -236,7 +236,6 @@ class DataHandler():
     ''' say msg '''
     def handleSayMsg(self, index, jsonData):
         msg = jsonData[0]["msg"]
-        g.serverLogger.info('player said something D:')
         mapMsg(getPlayerMap(index), getPlayerName(index) + ': ' + msg, sayColor)
 
     ''' Player message '''

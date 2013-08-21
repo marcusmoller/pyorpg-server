@@ -328,6 +328,7 @@ def joinGame(index):
         sendVital(index, i)
 
     sendStats(index)
+    sendLevel(index)
 
     # warp player to saved location
     playerWarp(index, getPlayerMap(index), getPlayerX(index), getPlayerY(index))
@@ -1067,6 +1068,8 @@ def checkPlayerLevelUp(index):
         globalMsg(getPlayerName(index) + ' has gained a level!', textColor.BRIGHT_BLUE)  # todo: brown color
         playerMsg(index, 'You have gained a level! You now have ' + str(getPlayerPoints(index)) + ' stat points to distribute.', textColor.BRIGHT_BLUE)
 
+    sendLevel(index)
+
 
 def getPlayerVitalRegen(index, vital):
     if not isPlaying(index):
@@ -1107,6 +1110,8 @@ def onDeath(index):
     sendVital(index, Vitals.hp)
     sendVital(index, Vitals.mp)
     sendVital(index, Vitals.sp)
+
+    sendLevel(index)
 
     # if the player that the attacker killed was a pk (player killer) then take it away
     # todo
@@ -1307,6 +1312,10 @@ def sendVital(index, vital):
 
 def sendStats(index):
     packet = json.dumps([{"packet": ServerPackets.SPlayerStats, "strength": getPlayerStat(index, 0), "defense": getPlayerStat(index, 1), "speed": getPlayerStat(index, 2), "magic": getPlayerStat(index, 3)}])
+    g.conn.sendDataTo(index, packet)
+
+def sendLevel(index):
+    packet = json.dumps([{"packet": ServerPackets.SPlayerLevel, "level": getPlayerLevel(index), "exp": getPlayerExp(index), "exptolevel": getPlayerNextLevel(index)}])
     g.conn.sendDataTo(index, packet)
 
 def sendWelcome(index):

@@ -611,6 +611,250 @@ def npcMove(mapNum, mapNpcNum, direction, movement):
         mapNPC[mapNum][mapNpcNum].x += 1
         sendNpcMove(mapNpcNum, movement, mapNum)
 
+def npcDir(mapNum, mapNpcNum, direction):
+    if mapNum < 0 or mapNum > MAX_MAPS or mapNpcNum < 0 or mapNpcNum > MAX_MAP_NPCS or direction < DIR_UP or direction > DIR_RIGHT:
+        return
+
+    mapNPC[mapNum][mapNpcNum].dir = direction
+
+    packet = json.dumps([{"packet": ServerPackets.SNpcDir, "mapnpcnum": mapNpcNum, "direction": direction}])
+    g.conn.sendDataToMap(mapNum, packet)
+
+
+def canAttackNpc(attacker, mapNpcNum):
+    if not isPlaying(attacker) or mapNpcNum < 0 or mapNpcNum > MAX_MAP_NPCS:
+        return
+
+    if mapNPC[getPlayerMap(attacker)][mapNpcNum].num is None:
+        return
+
+    mapNum = getPlayerMap(attacker)
+    npcNum = mapNPC[getPlayerMap(attacker)][mapNpcNum].num
+
+    # make sure npc isnt already dead
+    if mapNPC[mapNum][mapNpcNum].vital[Vitals.hp] <= 0:
+        return
+
+    # make sure they are on the same map
+    tickCount = time.time() * 1000
+    if isPlaying(attacker):
+        if npcNum is not None and tickCount > TempPlayer[attacker].attackTimer + 1000:
+            # check if at same coordinates
+
+            direction = getPlayerDir(attacker)
+
+            if direction == DIR_UP:
+                npcX = mapNPC[mapNum][mapNpcNum].x
+                npcY = mapNPC[mapNum][mapNpcNum].y + 1
+
+            elif direction == DIR_DOWN:
+                npcX = mapNPC[mapNum][mapNpcNum].x
+                npcY = mapNPC[mapNum][mapNpcNum].y - 1
+
+            elif direction == DIR_LEFT:
+                npcX = mapNPC[mapNum][mapNpcNum].x + 1
+                npcY = mapNPC[mapNum][mapNpcNum].y
+
+            elif direction == DIR_RIGHT:
+                npcX = mapNPC[mapNum][mapNpcNum].x - 1
+                npcY = mapNPC[mapNum][mapNpcNum].y
+
+            if npcX == getPlayerX(attacker) and npcY == getPlayerY(attacker):
+                if NPC[npcNum].behaviour != NPC_BEHAVIOUR_FRIENDLY and NPC[npcNum].behaviour != NPC_BEHAVIOUR_SHOPKEEPER:
+                    return True
+                else:
+                    playerMsg(attacker, 'You cannot attack a ' + NPC[npcNum].name + '!', textColor.BRIGHT_BLUE)
+
+def attackNpc(attacker, mapNpcNum, damage):
+    if not isPlaying(attacker) or mapNpcNum < 0 or mapNpcNum > MAX_MAP_NPCS or damage < 0:
+        return
+
+    mapNum = getPlayerMap(attacker)
+    npcNum = mapNPC[getPlayerMap(attacker)][mapNpcNum].num
+    name = NPC[npcNum].name
+
+    # send packet so they can see attacker attacking
+    packet = json.dumps([{"packet": ServerPackets.SAttack, "attacker": attacker}])
+    g.conn.sendDataToMapBut(getPlayerMap(attacker), attacker, packet)
+
+    # check for weapon
+    weaponNum = None
+    if getPlayerEquipmentSlot(attacker, Equipment.weapon) != None:
+        weaponNum = getPlayerInvItemNum(attacker, getPlayerEquipmentSlot(attacker, Equipment.weapon))
+
+    if damage >= mapNPC[mapNum][mapNpcNum].vital[Vitals.hp]:
+        # check for a weapon and say damage
+        if weaponNum is not None:
+            # weapon is equipped
+            playerMsg(attacker, 'You hit a ' + name + ' with a ' + Item[weaponNum].name + ' for ' + str(damage) + ' hit points, killing it.', textColor.BRIGHT_RED)
+
+        else:
+            playerMsg(attacker, 'You hit a ' + name + ' for ' + str(damage) + ' hit points, killing it.', textColor.BRIGHT_RED)
+
+        # calculate exp to give attacker
+        statStr = NPC[npcNum].stat[Stats.strength]
+        statDef = NPC[npcNum].stat[Stats.defense]
+        exp = statStr * statDef * 2
+
+        if exp < 0:
+            exp = 1
+
+        # check if in party, if so divide exp up by 2
+        if not TempPlayer[attacker].inParty:
+            setPlayerExp(attacker, getPlayerExp(attacker) + exp)
+            playerMsg(attacker, 'You have agained ' + str(exp) + ' experience points.', textColor.BRIGHT_BLUE)
+
+        else:
+            # player is in party
+            print 'player is in party, todo'
+
+        # drop loot if they have it
+        n = random.randint(0, NPC[npcNum].dropChance)
+
+        if n == 1:
+            spawnItem(NPC[npNum].dropItem, NPC[npcNum].dropitemValue, mapNum, mapNPC[mapNum][mapNpcNum].x, mapNPC[mapNum][mapNpcNum].y)
+
+        # now set hp to 0 so we kill them in the server loop
+        mapNPC[mapNum][mapNpcNum].num = None
+        mapNPC[mapNum][mapNpcNum].spawnWait = time.time()
+        mapNPC[mapNum][mapNpcNum].vital[Vitals.hp] = 0
+
+        # send packet that npc is dead to map
+        packet = json.dumps([{"packet": ServerPackets.SNpcDead, "mapnpcnum": mapNpcNum}])
+        g.conn.sendDataToMap(getPlayerMap(attacker), packet)
+
+        # check for level up
+        checkPlayerLevelUp(attacker)
+
+        # check for level up party member
+        # todo
+
+        # check if target is npc that died, and if so, set target to 0
+        # todo
+
+    else:
+        # npc not dead, just do damage
+        mapNPC[mapNum][mapNpcNum].vital[Vitals.hp] = mapNPC[mapNum][mapNpcNum].vital[Vitals.hp] - damage
+
+        # check for a weapon and say damage
+        if weaponNum is not None:
+            # weapon is equipped
+            playerMsg(attacker, 'You hit a ' + name + ' with a ' + Item[weaponNum].name + ' for ' + str(damage) + ' hit points.', textColor.BRIGHT_RED)
+
+        else:
+            playerMsg(attacker, 'You hit a ' + name + ' for ' + str(damage) + ' hit points.', textColor.BRIGHT_RED)
+
+        # check if we should send a message
+        if mapNPC[mapNum][mapNpcNum].target is None:
+            if len(NPC[npcNum].attackSay) > 0:
+                playerMsg(attacker, 'A ' + NPC[npcNum].name + ' says, ' + NPC[npcNum].attackSay + ' to you.', sayColor)
+
+        # set npc to target player
+        mapNPC[mapNum][mapNpcNum].target = attacker
+
+        # now check for guard ai and if so have all on map guards after the player
+        if NPC[mapNPC[mapNum][mapNpcNum].num].behaviour == NPC_BEHAVIOUR_GUARD:
+            for i in range(MAX_MAP_NPCS):
+                if mapNPC[mapNum][i].num == mapNPC[mapNum][mapNpcNum].num:
+                    mapNPC[mapNum][i].target = attacker
+
+    # reduce durability on weapon
+    damageEquipment(attacker, Equipment.weapon)
+
+    # reset attack timer
+    TempPlayer[attacker].attackTimer = time.time()
+
+
+def canNpcAttackPlayer(mapNpcNum, index):
+    if mapNpcNum < 0 or mapNpcNum > MAX_MAP_NPCS or not isPlaying(index):
+        return
+
+    if mapNPC[getPlayerMap(index)][mapNpcNum].num is None:
+        return
+
+    mapNum = getPlayerMap(index)
+    npcNum = mapNPC[getPlayerMap(index)][mapNpcNum].num
+
+    # make sure npc isnt already dead
+    if mapNPC[mapNum][mapNpcNum].vital[Vitals.hp] <= 0:
+        return
+
+    # make sure npcs dont attack more than once a second
+    tickCount = time.time() * 1000
+
+    if tickCount < mapNPC[mapNum][mapNpcNum].attackTimer + 1000:
+        return
+
+    # make sure we dont attack players that are switiching maps
+    if TempPlayer[index].gettingMap:
+        return
+
+    mapNPC[mapNum][mapNpcNum].attackTimer = tickCount
+
+    # make sure they are on the same map
+    if isPlaying(index):
+        if npcNum is not None:
+            # check if at same coordinates
+            if getPlayerY(index) + 1 == mapNPC[mapNum][mapNpcNum].y and getPlayerX(index) == mapNPC[mapNum][mapNpcNum].x:
+                return True
+
+            elif getPlayerY(index) - 1 == mapNPC[mapNum][mapNpcNum].y and getPlayerX(index) == mapNPC[mapNum][mapNpcNum].x:
+                return True
+
+            elif getPlayerY(index) == mapNPC[mapNum][mapNpcNum].y and getPlayerX(index) + 1 == mapNPC[mapNum][mapNpcNum].x:
+                return True
+
+            elif getPlayerY(index) == mapNPC[mapNum][mapNpcNum].y and getPlayerX(index) - 1 == mapNPC[mapNum][mapNpcNum].x:
+                return True
+
+def npcAttackPlayer(mapNpcNum, victim, damage):
+    if mapNpcNum < 0 or mapNpcNum > MAX_MAP_NPCS or not isPlaying(victim) or damage < 0:
+        return
+
+    if mapNPC[getPlayerMap(victim)][mapNpcNum].num is None:
+        return
+
+    mapNum = getPlayerMap(victim)
+    name = NPC[mapNPC[mapNum][mapNpcNum].num].name
+
+    # send this packet so they can see npc attacking
+
+    # reduce durability on victims equipment
+    damageEquipment(victim, Equipment.armor)
+    damageEquipment(victim, Equipment.helmet)
+
+    if damage >= getPlayerVital(victim, Vitals.hp):
+        # say damage
+        playerMsg(victim, 'A ' + name + ' hit you for ' + str(damage) + ' hit points.', textColor.BRIGHT_RED)
+
+        # player is dead
+        globalMsg(getPlayerName(victim) + ' has been killed by a ' + name, textColor.BRIGHT_RED)
+
+        # calculate exp to give attacker
+        exp = getPlayerExp(victim) // 3
+
+        # make sure we dont get less than 0
+        if exp < 0:
+            exp = 0
+
+        if exp == 0:
+            playerMsg(victim, 'You lost no experience points.', textColor.BRIGHT_RED)
+        else:
+            setPlayerExp(victim, getPlayerExp(victim) - exp)
+            playerMsg(victim, 'You lost ' + str(exp) + ' experience points.', textColor.BRIGHT_RED)
+
+        # set npc target to noone
+        mapNPC[mapNum][mapNpcNum].target = None
+
+        onDeath(victim)
+
+    else:
+        # player not dead, just do damage
+        setPlayerVital(victim, Vitals.hp, getPlayerVital(victim, Vitals.hp) - damage)
+        sendVital(victim, Vitals.hp)
+
+        # say damage
+        playerMsg(victim, 'A ' + name + ' hit you for ' + str(damage) + ' hit points.', textColor.BRIGHT_RED)
 
 def findOpenInvSlot(index, itemNum):
     if not isPlaying(index) or itemNum < 0 or itemNum > MAX_ITEMS:

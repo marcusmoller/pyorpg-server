@@ -346,6 +346,24 @@ class DataHandler():
                         playerMsg(tempIndex, 'Your ' + Item[getPlayerInvItemNum(tempIndex, getPlayerEquipmentSlot(tempIndex, Equipment.shield))].name + ' has blocked ' + getPlayerName(index) + '\'s hit!', textColor.BRIGHT_CYAN)
 
         # todo: handle attack npc
+        for i in range(MAX_MAP_NPCS):
+            if canAttackNpc(index, i):
+                # get the damage we can do
+                if not canPlayerCriticalHit(index):
+                    damage = getPlayerDamage(index) - (NPC[mapNPC[getPlayerMap(index)][i].num].stat[Stats.strength] // 2)
+
+                else:
+                    n = getPlayerDamage(index)
+                    damage = n + random.randint(0, n // 2) + 1 - (NPC[mapNPC[getPlayerMap(index)][i].num].stat[Stats.defense] // 2)
+
+                    playerMsg(index, 'You feel a surge of energy upon swinging!', textColor.BRIGHT_CYAN)
+
+                if damage > 0:
+                    attackNpc(index, i, damage)
+                    
+                else:
+                    playerMsg(index, 'Your attack does nothing.', textColor.BRIGHT_RED)
+
 
     def handlePlayerInfoRequest(self, index, jsonData):
         name = jsonData[0]['name']

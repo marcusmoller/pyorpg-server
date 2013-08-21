@@ -97,6 +97,9 @@ class TempPlayerClass():
         self.attackTimer = 0
         self.target = 0
 
+        self.partyPlayer = None
+        self.inParty = False
+
         self.dataTimer = None
         self.dataBytes = None
         self.dataPackets = None
@@ -186,8 +189,8 @@ class MapNPCClass():
         self.dir = None
 
         # server use only
-        self.spawnWait = None
-        self.attackTimer = None
+        self.spawnWait = 0
+        self.attackTimer = 0
 
 
 # Data initializations

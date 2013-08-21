@@ -585,7 +585,7 @@ def loadNpcs():
         NPC[i].attackSay = rows['attack_say']
         NPC[i].sprite = int(rows['sprite'])
         NPC[i].spawnSecs = int(rows['spawn_secs'])
-        NPC[i].behavior = int(rows['behavior'])
+        NPC[i].behaviour = int(rows['behavior'])
         NPC[i].range = int(rows['range'])
 
         NPC[i].dropChance = int(rows['drop_chance'])

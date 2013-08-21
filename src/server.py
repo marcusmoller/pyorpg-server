@@ -206,8 +206,8 @@ def serverLoop():
         updateSavePlayers()
         lastUpdateSavePlayers = time.time() * 1000 + 600000
 
-    # loop the serverLoop function every second
-    reactor.callLater(1, serverLoop)
+    # loop the serverLoop function every half second
+    reactor.callLater(0.5, serverLoop)
 
 def updateNpcAi():
     global lastRegenNpcHp
@@ -250,7 +250,7 @@ def updateNpcAi():
                 # npc walking/targetting
                 # todo: better ai movement
                 if Map[i].npc[j] != None:
-                    if mapNPC[i][j] != None:
+                    if mapNPC[i][j].num != None:
                         target = mapNPC[i][j].target
 
                         # check if its time for the npc to walk

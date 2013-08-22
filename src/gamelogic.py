@@ -328,6 +328,7 @@ def joinGame(index):
         sendVital(index, i)
 
     sendStats(index)
+    sendLevel(index)
 
     # warp player to saved location
     playerWarp(index, getPlayerMap(index), getPlayerX(index), getPlayerY(index))
@@ -1046,7 +1047,89 @@ def playerMapGetItem(index):
                     break
 
 def playerMapDropItem(index, invNum, amount):
-    print "todo"
+    if not isPlaying(index) or invNum < 0 or invNum > MAX_INV:
+        return
+
+    if getPlayerInvItemNum(index, invNum) is not None:
+        if getPlayerInvItemNum(index, invNum) <= MAX_ITEMS:
+            i = findOpenMapItemSlot(getPlayerMap(index))
+
+            if i is not None:
+                mapItem[getPlayerMap(index)][i].dur = 0
+
+                # check if its any sort of armor or weapon
+                itemType = Item[getPlayerInvItemNum(index, invNum)].type
+
+                if itemType == ITEM_TYPE_ARMOR:
+                    if invNum == getPlayerEquipmentSlot(index, Equipment.armor):
+                        setPlayerEquipmentSlot(index, 0, Equipment.armor)
+                        sendWornEquipment(index)
+
+                    mapItem[getPlayerMap(index)][i].dur = getPlayerInvItemDur(index, invNum)
+
+                elif itemType == ITEM_TYPE_WEAPON:
+                    if invNum == getPlayerEquipmentSlot(index, Equipment.weapon):
+                        setPlayerEquipmentSlot(index, 0, Equipment.weapon)
+                        sendWornEquipment(index)
+
+                    mapItem[getPlayerMap(index)][i].dur = getPlayerInvItemDur(index, invNum)
+
+                elif itemType == ITEM_TYPE_HELMET:
+                    if invNum == getPlayerEquipmentSlot(index, Equipment.helmet):
+                        setPlayerEquipmentSlot(index, 0, Equipment.helmet)
+                        sendWornEquipment(index)
+
+                    mapItem[getPlayerMap(index)][i].dur = getPlayerInvItemDur(index, invNum)
+
+                elif itemType == ITEM_TYPE_SHIELD:
+                    if invNum == getPlayerEquipmentSlot(index, Equipment.shield):
+                        setPlayerEquipmentSlot(index, 0, Equipment.shield)
+                        sendWornEquipment(index)
+
+                    mapItem[getPlayerMap(index)][i].dur = getPlayerInvItemDur(index, invNum)
+
+                mapItem[getPlayerMap(index)][i].num = getPlayerInvItemNum(index, invNum)
+                mapItem[getPlayerMap(index)][i].x = getPlayerX(index)
+                mapItem[getPlayerMap(index)][i].y = getPlayerY(index)
+
+                if itemType == ITEM_TYPE_CURRENCY:
+                    # check if its more than they have, and if so drop it
+                    if amount >= getPlayerInvItemValue(index, invNum):
+                        mapItem[getPlayerMap(index)][i].value = getPlayerInvItemValue(index, invNum)
+                        
+                        mapMsg(getPlayerMap(index), getPlayerName(index) + ' drops ' + str(getPlayerInvItemValue(index, invNum)) + ' ' + Item[getPlayerInvItemNum(index, invNum)].name + '.', textColor.YELLOW)
+
+                        setPlayerInvItemNum(index, invNum, None)
+                        setPlayerInvItemValue(index, invNum, 0)
+                        setPlayerInvItemDur(index, invNum, 0)
+
+                    else:
+                        mapItem[getPlayerMap(index)][i].value = amount
+
+                        mapMsg(getPlayerMap(index), getPlayerName(index) + ' drops ' + str(amount) + ' ' + Item[getPlayerInvItemNum(index, invNum)].name + '.', textColor.YELLOW)
+
+                        setPlayerInvItemValue(index, invNum, getPlayerInvItemValue(index, invNum) - amount)
+
+                else:
+                    # its not a currency
+                    mapItem[getPlayerMap(index)][i].value = 0
+
+                    # msg todo
+
+                    setPlayerInvItemNum(index, invNum, None)
+                    setPlayerInvItemValue(index, invNum, 0)
+                    setPlayerInvItemDur(index, invNum, 0)
+
+                # send inventory update
+                sendInventoryUpdate(index, invNum)
+
+                # spawn item
+                spawnItemSlot(i, mapItem[getPlayerMap(index)][i].num, amount, mapItem[getPlayerMap(index)][i].dur, getPlayerMap(index), getPlayerX(index), getPlayerY(index))
+
+            else:
+                playerMsg(index, 'Too many items already on the ground.', textColor.BRIGHT_RED)
+
+
 
 
 def checkPlayerLevelUp(index):
@@ -1066,6 +1149,8 @@ def checkPlayerLevelUp(index):
         setPlayerExp(index, expRollOver)
         globalMsg(getPlayerName(index) + ' has gained a level!', textColor.BRIGHT_BLUE)  # todo: brown color
         playerMsg(index, 'You have gained a level! You now have ' + str(getPlayerPoints(index)) + ' stat points to distribute.', textColor.BRIGHT_BLUE)
+
+    sendLevel(index)
 
 
 def getPlayerVitalRegen(index, vital):
@@ -1095,7 +1180,7 @@ def onDeath(index):
     for i in range(Equipment.equipment_count):
         if getPlayerEquipmentSlot(index, i) is not None:
             # drop item on map
-            print "todo: drop item " + str(i)
+            playerMapDropItem(index, getPlayerEquipmentSlot(index, i), 0)
 
     # warp player away
     playerWarp(index, START_MAP, START_X, START_Y)
@@ -1107,6 +1192,8 @@ def onDeath(index):
     sendVital(index, Vitals.hp)
     sendVital(index, Vitals.mp)
     sendVital(index, Vitals.sp)
+
+    sendLevel(index)
 
     # if the player that the attacker killed was a pk (player killer) then take it away
     # todo
@@ -1307,6 +1394,10 @@ def sendVital(index, vital):
 
 def sendStats(index):
     packet = json.dumps([{"packet": ServerPackets.SPlayerStats, "strength": getPlayerStat(index, 0), "defense": getPlayerStat(index, 1), "speed": getPlayerStat(index, 2), "magic": getPlayerStat(index, 3)}])
+    g.conn.sendDataTo(index, packet)
+
+def sendLevel(index):
+    packet = json.dumps([{"packet": ServerPackets.SPlayerLevel, "level": getPlayerLevel(index), "exp": getPlayerExp(index), "exptolevel": getPlayerNextLevel(index)}])
     g.conn.sendDataTo(index, packet)
 
 def sendWelcome(index):

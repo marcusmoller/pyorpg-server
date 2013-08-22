@@ -266,6 +266,8 @@ def savePlayer(index):
         charId = rows['id']
 
         query = database.sendQuery("""UPDATE characters SET sprite=?,
+                                                          level=?,
+                                                          exp=?,
                                                           map=?,
                                                           x=?,
                                                           y=?,
@@ -274,7 +276,9 @@ def savePlayer(index):
                                                           helmet=?, armor=?, weapon=?, shield=?,
                                                           stats_strength=?, stats_defense=?, stats_speed=?, stats_magic=?,
                                                           vital_hp=?, vital_mp=?, vital_sp=?
-                                                          WHERE name=?;""", (getPlayerSprite(index),
+                                                          WHERE name=?;""", (getPlayerSprite(index),     \
+                                                                               getPlayerLevel(index),    \
+                                                                               getPlayerExp(index),      \
                                                                                getPlayerMap(index),      \
                                                                                getPlayerX(index),        \
                                                                                getPlayerY(index),        \
@@ -344,6 +348,8 @@ def loadPlayer(index, name):
             Player[index].char[i].Class = rows[i]['class']
             Player[index].char[i].access = rows[i]['access']
             Player[index].char[i].sprite = rows[i]['sprite']
+            Player[index].char[i].level = rows[i]['level']
+            Player[index].char[i].exp = rows[i]['exp']
             Player[index].char[i].Map = rows[i]['map']
             Player[index].char[i].x = rows[i]['x']
             Player[index].char[i].y = rows[i]['y']

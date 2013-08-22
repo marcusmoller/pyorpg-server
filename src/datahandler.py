@@ -141,9 +141,7 @@ class DataHandler():
     ''' Player login '''
     def handleLogin(self, index, jsonData):
         if not isPlaying(index):
-            g.serverLogger.info('Not playing')
             if not isLoggedIn(index):
-                g.serverLogger.info('Not logged in')
 
                 plrName = jsonData[0]["name"]
                 plrPassword = jsonData[0]["password"]

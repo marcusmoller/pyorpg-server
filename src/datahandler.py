@@ -151,19 +151,20 @@ class DataHandler():
                 # todo: is shutting down?
 
                 if len(plrName) < 3 or len(plrPassword) < 3:
-                    #alert msg
+                    alertMsg(index, "The acount name or password is too short!")
                     return
-
-                if not accountExists(plrName):
+                
+                #Not necessary
+                '''if not accountExists(plrName):
                     # alert msg
-                    return
+                    return'''
 
                 if not passwordOK(plrName, plrPassword):
-                    # alert msg
+                    alertMsg(index, "Wrong account name or password!")
                     return
 
                 if isMultiAccounts(plrName):
-                    # alert msg
+                    alertMsg(index, "That account is already logged in!")
                     return
 
                 # load the player

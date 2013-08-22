@@ -145,8 +145,6 @@ class DataHandler():
 
                 plrName = jsonData[0]["name"]
                 plrPassword = jsonData[0]["password"]
-                
-                g.serverLogger.info(plrName)
 
                 # todo: check version
 

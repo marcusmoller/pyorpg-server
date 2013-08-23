@@ -646,7 +646,7 @@ def clearMapNpcs():
 def clearMap(mapNum):
     Map[mapNum].tileSet = 1
     Map[mapNum].name = ""
-    playersOnMap[mapNum] = None
+    playersOnMap[mapNum] = 0
     MapCache[mapNum] = ""
 
 def clearMaps():

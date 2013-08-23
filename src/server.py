@@ -2,6 +2,7 @@ import time
 import logging
 import logging.handlers
 
+# twisted
 from twisted.internet.protocol import Factory
 from twisted.internet import reactor
 from twisted.protocols.basic import LineReceiver
@@ -13,7 +14,6 @@ from objects import *
 import globalvars as g
 
 dataHandler = None
-
 
 def startServer():
     # start logging
@@ -121,6 +121,10 @@ class gameServerProtocol(LineReceiver):
 
         dataHandler.handleData(clientIndex, data)
 
+    def closeConnection(self, index):
+        ''' closes connection with client #index '''
+        print 'todo'
+
     def sendDataTo(self, index, data):
         self.factory.clients[index].sendLine(data)
 
@@ -219,9 +223,6 @@ def updateNpcAi():
 
             for j in range(MAX_MAP_NPCS):
                 npcNum = mapNPC[i][j].num
-
-                if npcNum is None:
-                    continue
 
                 # attacking on sight
                 if Map[i].npc[j] != None and mapNPC[i][j].num != None:
@@ -442,7 +443,7 @@ def updateNpcAi():
                 # npc spawning
                 if mapNPC[i][j].num is None:
                     if Map[i].npc[j] is not None:
-                        if time.time() * 1000 > mapNPC[i][j].spawnWait + NPC[Map[i].npc[j].spawnSecs * 1000]:
+                        if time.time() * 1000 > mapNPC[i][j].spawnWait + NPC[Map[i].npc[j]].spawnSecs * 1000:
                             spawnNpc(j, i)
 
 

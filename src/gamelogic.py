@@ -213,7 +213,7 @@ def playerMove(index, direction, movement):
         moved = True
 
     if moved == False:
-        # hacking attempt
+        hackingAttempt(index, 'Position Modification')
         g.serverLogger.info("hacking attempt (playerMove)")
 
 
@@ -710,14 +710,14 @@ def attackNpc(attacker, mapNpcNum, damage):
             print 'player is in party, todo'
 
         # drop loot if they have it
-        n = random.randint(0, NPC[npcNum].dropChance)
+        n = random.randint(1, NPC[npcNum].dropChance)
 
         if n == 1:
-            spawnItem(NPC[npNum].dropItem, NPC[npcNum].dropitemValue, mapNum, mapNPC[mapNum][mapNpcNum].x, mapNPC[mapNum][mapNpcNum].y)
+            spawnItem(NPC[npcNum].dropItem, NPC[npcNum].dropItemValue, mapNum, mapNPC[mapNum][mapNpcNum].x, mapNPC[mapNum][mapNpcNum].y)
 
         # now set hp to 0 so we kill them in the server loop
         mapNPC[mapNum][mapNpcNum].num = None
-        mapNPC[mapNum][mapNpcNum].spawnWait = time.time()
+        mapNPC[mapNum][mapNpcNum].spawnWait = time.time() * 1000
         mapNPC[mapNum][mapNpcNum].vital[Vitals.hp] = 0
 
         # send packet that npc is dead to map
@@ -1022,7 +1022,7 @@ def playerMapGetItem(index):
                     # is the item a currency?
                     if Item[getPlayerInvItemNum(index, n)].type == ITEM_TYPE_CURRENCY:
                         setPlayerInvItemValue(index, n, getPlayerInvItemValue(index, n) + mapItem[mapNum][i].value)
-                        msg = 'You picked up ' + mapItem[mapNum][i].value + ' ' + Item[getPlayerInvItemNum(index, n)].name + '.'
+                        msg = 'You picked up ' + str(mapItem[mapNum][i].value) + ' ' + Item[getPlayerInvItemNum(index, n)].name + '.'
 
                     else:
                         setPlayerInvItemValue(index, n, 0)
@@ -1271,6 +1271,15 @@ def mapMsg(mapNum, msg, color=(255, 0, 0)):
 def alertMsg(index, reason):
     packet = json.dumps([{"packet": ServerPackets.SAlertMsg, "msg": reason}])
     g.conn.sendDataTo(index, packet)
+
+def hackingAttempt(index, reason):
+    if index is not None:
+        if isPlaying(index):
+            globalMsg(getPlayerLogin(index) + '/' + getPlayerName(index) + ' has been booted for (' + reason +')', textColor.WHITE)
+
+        alertMsg(index, 'You have lost your connection with ' + GAME_NAME + '.')
+
+        g.conn.closeConnection(index)
 
 
 def isPlaying(index):

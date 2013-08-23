@@ -111,7 +111,7 @@ class DataHandler():
 
         else:
             # Packet is unknown - hacking attempt
-            print "hacking attempt"
+            hackingAttempt(index, 'Packet Modification')
 
     def handleGetClasses(self, index):
         if not isPlaying(index):
@@ -183,30 +183,30 @@ class DataHandler():
 
             # prevent hacking
             if len(name) < 3:
-                print "hacking alert (handleAddChar() too short name)"
+                alertMsg(index, 'Character name must be at least three characters in length.')
                 return
 
             #todo: check for certain letters
 
 
             if charNum < 0 or charNum > MAX_CHARS:
-                print "hacking attempt (handleaddChar() invalid charnum)"
+                alertMsg(index, 'Invalid CharNum')
                 return
 
             #todo: check sex
 
             if Class < 0 or Class > g.maxClasses:
-                print "hacking attempt (handleaddChar() invalid class)"
+                alertMsg(index, 'Invalid Class')
                 return
 
             # check if a character already exists in slot
             if charExist(index, charNum):
-                print "character slot already in use (handleaddchar())"
+                alertMsg(index, 'Character already exists')
                 return
 
             # check if name is in use
             if findChar(name):
-                print "name already in use"
+                alertMsg(index, 'Sorry, but that name is in use!')
                 return
 
             # everything went ok, add the character
@@ -224,7 +224,7 @@ class DataHandler():
             charNum = jsonData[0]["charslot"]
 
             if charNum < 0 or charNum > MAX_CHARS:
-                print "hacking attempt (handleUseChar)"
+                hackingAttempt(index, 'Invalid CharNum')
                 return
 
             # make sure character exists
@@ -261,11 +261,11 @@ class DataHandler():
 
         # prevent cheating
         if invNum < 0 or invNum > MAX_ITEMS:
-            print 'hacking attempt'
+            hackingAttempt(index, 'Invalid invNum')
             return
 
         if charNum < 0 or charNum > MAX_CHARS:
-            print 'hacking attempt'
+            hackingAttempt(index, 'Invalid charNum')
             return
 
         if getPlayerInvItemNum(index, invNum) >= 0 and getPlayerInvItemNum(index, invNum) <= MAX_ITEMS:
@@ -395,7 +395,7 @@ class DataHandler():
 
     def handleWarpMeTo(self, index, jsonData):
         if getPlayerAccess(index) < ADMIN_MAPPER:
-            print "hacking attempt"
+            hackingAttempt(index, 'Admin Cloning')
             return
 
         playerName = jsonData[0]['name']
@@ -416,7 +416,7 @@ class DataHandler():
 
     def handleWarpToMe(self, index, jsonData):
         if getPlayerAccess(index) < ADMIN_MAPPER:
-            print "hacking attempt"
+            hackingAttempt(index, 'Admin Cloning')
             return
 
         playerName = jsonData[0]['name']
@@ -437,13 +437,13 @@ class DataHandler():
 
     def handleWarpTo(self, index, jsonData):
         if getPlayerAccess(index) < ADMIN_MAPPER:
-            print "hacking attempt"
+            hackingAttempt(index, 'Admin Cloning')
             return
 
         mapNum = jsonData[0]['map']
 
         if mapNum < 0 or mapNum > MAX_MAPS:
-            print "hacking attempt"
+            hackingAttempt(index, 'Invalid MapNum')
             return
 
         playerWarp(index, mapNum, getPlayerX(index), getPlayerY(index))
@@ -452,7 +452,7 @@ class DataHandler():
 
     def handleSetSprite(self, index, jsonData):
         if getPlayerAccess(index) < ADMIN_MAPPER:
-            print "hacking attempt"
+            hackingAttempt(index, 'Admin Cloning')
             return
 
         n = jsonData[0]["sprite"]
@@ -471,7 +471,7 @@ class DataHandler():
 
     def handleMapData(self, index, jsonData):
         if getPlayerAccess(index) < ADMIN_MAPPER:
-            print "hacking attempt - admin cloning"
+            hackingAttempt(index, 'Admin Cloning')
             return
 
         mapNum = getPlayerMap(index)
@@ -559,7 +559,7 @@ class DataHandler():
 
     def handleMapReport(self, index):
         if getPlayerAccess(index) < ADMIN_MAPPER:
-            print "hacking attempt - admin cloning"
+            hackingAttempt(index, 'Admin Cloning')
             return
 
         msg = 'Free Maps: '
@@ -584,7 +584,7 @@ class DataHandler():
 
     def handleMapRespawn(self, index):
         if getPlayerAccess(index) < ADMIN_MAPPER:
-            print "hacking attempt - admin cloning"
+            hackingAttempt(index, 'Admin Cloning')
             return
 
         # clear it all
@@ -627,27 +627,27 @@ class DataHandler():
 
     def handleRequestEditMap(self, index):
         if getPlayerAccess(index) < ADMIN_MAPPER:
-            print "hacking attempt"
+            hackingAttempt(index, 'Admin Cloning')
             return
 
         sendEditMap(index)
 
     def handleRequestEditItem(self, index):
         if getPlayerAccess(index) < ADMIN_DEVELOPER:
-            print "hacking attempt"
+            hackingAttempt(index, 'Admin Cloning')
             return
 
         sendItemEditor(index)
 
     def handleSaveItem(self, index, jsonData):
         if getPlayerAccess(index) < ADMIN_CREATOR:
-            print "hacking attempt"
+            hackingAttempt(index, 'Admin Cloning')
             return
 
         itemNum = int(jsonData[0]['itemnum'])
 
         if itemNum < 0 or itemNum > MAX_ITEMS:
-            print 'hacking attempt'
+            hackingAttempt(index, 'Invalid ItemNum')
             return
 
         # update item
@@ -662,17 +662,18 @@ class DataHandler():
         sendUpdateItemToAll(itemNum)
         saveItem(itemNum)
         g.connectionLogger.info(getPlayerName(index) + ' saved item #' + str(itemNum) + '.')
+        playerMsg(index, Item[itemNum].name + ' was saved as item #' + str(itemNum), textColor.BRIGHT_BLUE)
 
     def handleRequestEditNpc(self, index):
         if getPlayerAccess(index) < ADMIN_DEVELOPER:
-            print "hacking attempt"
+            hackingAttempt(index, 'Admin Cloning')
             return
 
         sendNpcEditor(index)
 
     def handleSaveNpc(self, index, jsonData):
         if getPlayerAccess(index) < ADMIN_DEVELOPER:
-            print "hacking attempt"
+            hackingAttempt(index, 'Admin Cloning')
             return
 
         npcNum = jsonData[0]['npcnum']
@@ -684,6 +685,7 @@ class DataHandler():
         NPC[npcNum].name = jsonData[0]['name']
         NPC[npcNum].attackSay = jsonData[0]['attacksay']
         NPC[npcNum].sprite = jsonData[0]['sprite']
+        NPC[npcNum].spawnSecs = jsonData[0]['spawnsec']
         NPC[npcNum].behaviour = jsonData[0]['behavior']
         NPC[npcNum].range = jsonData[0]['range']
 
@@ -703,7 +705,7 @@ class DataHandler():
 
     def handleSetAccess(self, index, jsonData):
         if getPlayerAccess(index) < ADMIN_CREATOR:
-            print "hacking attempt"
+            hackingAttempt(index, 'Admin Cloning')
             return
 
         plrName = jsonData[0]['name']
@@ -732,7 +734,7 @@ class DataHandler():
 
     def handleGiveItem(self, index, jsonData):
         if getPlayerAccess(index) < ADMIN_DEVELOPER:
-            print "hacking attempt"
+            hackingAttempt(index, 'Admin Cloning')
             return
 
         plrName = jsonData[0]['name']

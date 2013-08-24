@@ -97,6 +97,9 @@ class DataHandler():
         elif packetType == ClientPackets.CRequestEditNpc:
             self.handleRequestEditNpc(index)
 
+        elif packetType == ClientPackets.CEditNpc:
+            self.handleEditNpc(index, jsonData)
+
         elif packetType == ClientPackets.CSaveNpc:
             self.handleSaveNpc(index, jsonData)
 
@@ -671,6 +674,20 @@ class DataHandler():
 
         sendNpcEditor(index)
 
+    def handleEditNpc(self, index, jsonData):
+        if getPlayerAccess(index) < ADMIN_DEVELOPER:
+            hackingAttempt(index, 'Admin Cloning')
+            return
+
+        npcNum = jsonData[0]['npcnum']
+
+        # prevent hacking
+        if npcNum < 0 or npcNum > MAX_NPCS:
+            hackingAttempt(index, 'Invalid NPC Index')
+
+        g.connectionLogger.info(getPlayerName(index) + ' editing NPC #' + str(npcNum) + '.')
+        sendEditNpcTo(index, npcNum)
+
     def handleSaveNpc(self, index, jsonData):
         if getPlayerAccess(index) < ADMIN_DEVELOPER:
             hackingAttempt(index, 'Admin Cloning')
@@ -702,6 +719,7 @@ class DataHandler():
         sendUpdateNpcToAll(npcNum)
         saveNpc(npcNum)
         g.connectionLogger.info(getPlayerName(index) + ' saved NPC #' + str(npcNum) + '.')
+        playerMsg(index, NPC[npcNum].name + ' was saved as NPC #' + str(npcNum), textColor.BRIGHT_BLUE)
 
     def handleSetAccess(self, index, jsonData):
         if getPlayerAccess(index) < ADMIN_CREATOR:

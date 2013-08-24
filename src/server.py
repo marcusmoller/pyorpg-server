@@ -2,6 +2,11 @@ import time
 import logging
 import logging.handlers
 
+# todo: gui
+#from gui import ServerGUI
+#from twisted.internet import gtk2reactor
+#gtk2reactor.install()
+
 # twisted
 from twisted.internet.protocol import Factory
 from twisted.internet import reactor
@@ -16,6 +21,9 @@ import globalvars as g
 dataHandler = None
 
 def startServer():
+    # start gui
+    serverGUI = ServerGUI()
+
     # start logging
     setupLogging()
 

@@ -595,7 +595,7 @@ def loadNpcs():
         NPC[i].range = int(rows['range'])
 
         NPC[i].dropChance = int(rows['drop_chance'])
-        NPC[i].dropItem = int(rows['drop_item'])
+        NPC[i].dropItem = rows['drop_item']
         NPC[i].dropItemValue = int(rows['drop_item_value'])
 
         NPC[i].stat[Stats.strength] = int(rows['stat_strength'])

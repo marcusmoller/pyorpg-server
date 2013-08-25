@@ -22,7 +22,7 @@ dataHandler = None
 
 def startServer():
     # start gui
-    serverGUI = ServerGUI()
+    #serverGUI = ServerGUI()
 
     # start logging
     setupLogging()

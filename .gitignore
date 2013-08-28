@@ -1,2 +1,6 @@
 # Ignore .log files in this directory
 *.log
+
+# ignore folders used for executables
+bin/
+tmp/

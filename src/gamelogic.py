@@ -1472,7 +1472,6 @@ def sendMap(index, mapNum):
 def sendMapList(index):
     packet = []
     packet.append({"packet": ServerPackets.SMapList})
-    print "todo: map editor client"
 
     mapNames = []
     for i in range(MAX_MAPS):

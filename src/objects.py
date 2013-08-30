@@ -64,6 +64,7 @@ class PlayerClass():
 
         # inventory
         self.inv = [PlayerInvClass() for i in range(MAX_INV)]
+        self.spell = [None for i in range(MAX_PLAYER_SPELLS)]
 
         # Position
         self.Map = 1    # None
@@ -160,6 +161,20 @@ class ItemClass():
         self.data2 = 0
         self.data3 = 0
 
+class SpellClass():
+    def __init__(self):
+        self.name = ''
+        self.pic = None
+
+        self.reqMp = None
+        self.reqClass = None
+        self.reqLevel = None
+
+        self.type = None
+        self.data1 = 0
+        self.data2 = 0
+        self.data3 = 0
+
 class NPCClass():
     def __init__(self):
         self.name = ''
@@ -192,6 +207,23 @@ class MapNPCClass():
         self.spawnWait = 0
         self.attackTimer = 0
 
+class TradeItemClass():
+    def __init__(self):
+        self.giveItem = None
+        self.giveValue = None
+
+        self.getItem = None
+        self.getValue = None
+
+class ShopClass():
+    def __init__(self):
+        self.name = ''
+        self.joinSay = ''
+        self.leaveSay = ''
+        self.fixesItems = False
+        self.tradeItem = [TradeItemClass() for i in range(MAX_TRADES)]
+
+
 
 # Data initializations
 Map = [MapClass() for i in range(MAX_MAPS)]
@@ -204,6 +236,8 @@ TempPlayer = [TempPlayerClass() for i in range(MAX_PLAYERS)]
 
 Class = [ClassClass() for i in range(99)]  # todo: dont use a fixed size, please
 Item = [ItemClass() for i in range(MAX_ITEMS)]
+Spell = [SpellClass() for i in range(MAX_SPELLS)]
 NPC = [NPCClass() for i in range(MAX_NPCS)]
 mapItem = [[MapItemClass() for i in range(MAX_MAP_ITEMS)] for j in range(MAX_MAPS)]
 mapNPC = [[MapNPCClass() for i in range(MAX_MAP_NPCS)] for j in range(MAX_MAPS)]
+Shop = [ShopClass() for i in range(MAX_SHOPS)]

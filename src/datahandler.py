@@ -94,6 +94,9 @@ class DataHandler():
         elif packetType == ClientPackets.CSaveItem:
             self.handleSaveItem(index, jsonData)
 
+        elif packetType == ClientPackets.CRequestEditSpell:
+            self.handleRequestEditSpell(index)
+
         elif packetType == ClientPackets.CRequestEditNpc:
             self.handleRequestEditNpc(index)
 
@@ -666,6 +669,12 @@ class DataHandler():
         saveItem(itemNum)
         g.connectionLogger.info(getPlayerName(index) + ' saved item #' + str(itemNum) + '.')
         playerMsg(index, Item[itemNum].name + ' was saved as item #' + str(itemNum), textColor.BRIGHT_BLUE)
+
+    def handleRequestEditSpell(self, index):
+        if getPlayerAccess(index) < ADMIN_DEVELOPER:
+            hackingAttempt(index, 'Admin Cloning')
+
+        sendSpellEditor(index)
 
     def handleRequestEditNpc(self, index):
         if getPlayerAccess(index) < ADMIN_DEVELOPER:

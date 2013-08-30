@@ -515,6 +515,26 @@ def checkItems():
         print "probably not necassary"
 
 
+# Spells
+def saveSpell(spellNum):
+    # todo
+    print 'todo'
+
+def saveSpells():
+    print 'Saving spells...'
+    for i in range(MAX_SPELLS):
+        saveSpell(i)
+
+def loadSpells():
+    print 'todo'
+
+def clearSpell(index):
+    Spell[index] = SpellClass()
+
+def clearSpells():
+    for i in range(MAX_SPELLS):
+        Spell[i] = SpellClass()
+
 # NPC
 
 def saveNpc(npcNum):
@@ -796,6 +816,12 @@ def getPlayerInvItemDur(index, invSlot):
     return Player[index].char[TempPlayer[index].charNum].inv[invSlot].dur
 def setPlayerInvItemDur(index, invSlot, itemDur):
     Player[index].char[TempPlayer[index].charNum].inv[invSlot].dur = itemDur
+
+''' player spell '''
+def getPlayerSpell(index, spellSlot):
+    return Player[index].char[TempPlayer[index].charNum].spell[spellSlot]
+def setPlayerSpell(index, spellSlot, spellNum):
+    Player[index].char[TempPlayer[index].charNum].spell[spellSlot] = spellNum
 
 ''' player equipment '''
 def getPlayerEquipmentSlot(index, equipmentSlot):

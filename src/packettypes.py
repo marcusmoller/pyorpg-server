@@ -1,5 +1,3 @@
-SEP_CHAR = "-"
-END_CHAR = "."
 
 class ClientPackets:
     CGetClasses, \
@@ -38,6 +36,10 @@ class ClientPackets:
     CRequestEditItem, \
     CEditItem, \
     CSaveItem, \
+    CRequestEditSpell, \
+    CEditSpell, \
+    CSaveSpell, \
+    CSpells, \
     CRequestEditNpc, \
     CEditNpc, \
     CSaveNpc, \
@@ -47,7 +49,7 @@ class ClientPackets:
     CWhosOnline, \
     CSetMotd, \
     CQuit        \
-    = range(45)
+    = range(49)
 
 
 class ServerPackets:
@@ -90,13 +92,18 @@ class ServerPackets:
     SSpawnItem,  \
     SItemEditor, \
     SUpdateItem, \
+    SSpellEditor, \
+    SUpdateSpell, \
+    SEditSpell, \
+    SSpells, \
+    SCastSpell, \
     SMapKey, \
     SEditMap, \
     SEditItem, \
     SMapList, \
     SLeft,       \
     SHighIndex   \
-    = range(45)
+    = range(50)
 
 
 class MessagePackets:

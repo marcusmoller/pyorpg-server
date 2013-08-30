@@ -20,8 +20,12 @@ MAX_ITEMS = 255       # the total maximum amount of items allowed in the game
 MAX_NPCS = 255        # the total maximum amount of npcs allowed in the game
 MAX_MAP_NPCS = 5      # the maximum amount of npcs allowed on a map
 MAX_INV = 9  # 50     # the amount of inventory slots
-MAX_MAP_ITEMS = 20    # the maximum amount of items on a map
+MAX_MAP_ITEMS = 20    # the maxmium amount of items on a map
 MAX_LEVELS = 100      # the maximum player and npc level
+MAX_SPELLS = 255      # the maximum amount of spells
+MAX_PLAYER_SPELLS = 20 # the maximum amount of spells allowed by a player
+MAX_TRADES = 8        # the maximum amount of items allowed to be traded in a trade
+MAX_SHOPS = 50        # the maximum amount of shops allowed in the game
 
 # website
 GAME_WEBSITE = "https://powrtoch.org/pyorpg/"

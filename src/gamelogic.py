@@ -1611,6 +1611,10 @@ def sendEditItem(index):
     packet = json.dumps([{"packet": ServerPackets.SEditItem}])
     g.conn.sendDataTo(index, packet)
 
+def sendSpellEditor(index):
+    packet = json.dumps([{"packet": ServerPackets.SSpellEditor}])
+    g.conn.sendDataTo(index, packet)
+
 def sendNpcs(index):
     for i in range(MAX_NPCS):
         if len(NPC[i].name) > 0:

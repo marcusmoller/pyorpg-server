@@ -537,9 +537,9 @@ def saveSpell(spellNum):
 
     if rows == None:
         # spell doesnt exist, create it
-        query = database.sendQuery("INSERT INTO spells (id, name, pic, type, reqmp, reqclass, reqlevel data1, data2, data3) \
-                                                           VALUES (%i, '%s', %i, %i, %i, %i, %i, %i, %i, %i);" \
-                                                           % (int(spellNum+1),             \
+        query = database.sendQuery("INSERT INTO spells (id, name, pic, type, reqmp, reqclass, reqlevel, data1, data2, data3) \
+                                                           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);", \
+                                                             (int(spellNum+1), \
                                                               Spell[spellNum].name,  \
                                                               Spell[spellNum].pic,   \
                                                               Spell[spellNum].type,  \

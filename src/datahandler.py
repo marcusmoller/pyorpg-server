@@ -683,8 +683,6 @@ class DataHandler():
         if getPlayerAccess(index) < ADMIN_DEVELOPER:
             hackingAttempt(index, 'Admin Cloning')
 
-        print jsonData
-
         # spell num
         spellNum = jsonData[0]['spellnum']
 
@@ -708,7 +706,7 @@ class DataHandler():
         # save
         sendUpdateSpellToAll(spellNum)
         saveSpell(spellNum)
-        g.serverLogger.info(getPlayerName(index) + ' saving spell #' + str(spellNum) + '.')
+        g.serverLogger.info(getPlayerName(index) + ' saved spell #' + str(spellNum) + '.')
 
 
     def handleRequestEditNpc(self, index):

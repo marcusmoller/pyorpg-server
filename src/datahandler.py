@@ -97,6 +97,9 @@ class DataHandler():
         elif packetType == ClientPackets.CRequestEditSpell:
             self.handleRequestEditSpell(index)
 
+        elif packetType == ClientPackets.CSaveSpell:
+            self.handleSaveSpell(index, jsonData)
+
         elif packetType == ClientPackets.CRequestEditNpc:
             self.handleRequestEditNpc(index)
 
@@ -675,6 +678,38 @@ class DataHandler():
             hackingAttempt(index, 'Admin Cloning')
 
         sendSpellEditor(index)
+
+    def handleSaveSpell(self, index, jsonData):
+        if getPlayerAccess(index) < ADMIN_DEVELOPER:
+            hackingAttempt(index, 'Admin Cloning')
+
+        print jsonData
+
+        # spell num
+        spellNum = jsonData[0]['spellnum']
+
+        # prevent hacking
+        if spellNum is None or spellNum > MAX_SPELLS:
+            hackingAttempt(index, 'Invalid Spell Index')
+
+        # update spell
+        Spell[spellNum].name = jsonData[0]['spellname']
+        Spell[spellNum].pic = jsonData[0]['spellpic']
+        Spell[spellNum].type = jsonData[0]['spelltype']
+
+        Spell[spellNum].reqMp = jsonData[0]['mpreq']
+        Spell[spellNum].reqClass = jsonData[0]['classreq']
+        Spell[spellNum].reqLevel = jsonData[0]['levelreq']
+
+        Spell[spellNum].data1 = jsonData[0]['data1']
+        Spell[spellNum].data2 = jsonData[0]['data2']
+        Spell[spellNum].data3 = jsonData[0]['data3']
+
+        # save
+        sendUpdateSpellToAll(spellNum)
+        saveSpell(spellNum)
+        g.serverLogger.info(getPlayerName(index) + ' saving spell #' + str(spellNum) + '.')
+
 
     def handleRequestEditNpc(self, index):
         if getPlayerAccess(index) < ADMIN_DEVELOPER:

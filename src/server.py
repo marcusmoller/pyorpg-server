@@ -99,9 +99,11 @@ def loadGameData():
     g.serverLogger.info('Loading maps...')
     loadMaps()
 
+    g.serverLogger.info('Loading spells...')
+    loadSpells()
+
     for i in range(MAX_PLAYERS):
         clearPlayer(i)
-
 
 class gameServerProtocol(LineReceiver):
     MAX_LENGTH = 999999 #todo: find a suitable size (see client: sendMap (in clienttcp.py))
@@ -131,7 +133,7 @@ class gameServerProtocol(LineReceiver):
 
     def closeConnection(self, index):
         ''' closes connection with client #index '''
-        print 'todo'
+        print 'closeConnection() todo'
 
     def sendDataTo(self, index, data):
         self.factory.clients[index].sendLine(data)

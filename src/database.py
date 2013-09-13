@@ -66,6 +66,14 @@ class Database():
                                               type INTEGER, \
                                               data1 INTEGER, data2 INTEGER, data3 INTEGER);")
 
+        # create table 'spells'
+        self.sendQuery("CREATE TABLE spells (id INTEGER PRIMARY KEY AUTOINCREMENT, \
+                                              name TEXT, \
+                                              pic INTEGER, \
+                                              type INTEGER, \
+                                              reqmp INTEGER, reqclass INTEGER, reqlevel INTEGER,\
+                                              data1 INTEGER, data2 INTEGER, data3 INTEGER);")
+
         # create table 'inventory'
         self.sendQuery("CREATE TABLE inventory (id INTEGER PRIMARY KEY AUTOINCREMENT, \
                                               character_id TEXT, \
@@ -98,6 +106,10 @@ class Database():
         # insert sample item "gold" and "Noob Helmet"
         self.sendQuery("INSERT INTO items (name, pic, type, data1, data2, data3) VALUES ('Gold', 3, 12, 0, 0, 0);")
         self.sendQuery("INSERT INTO items (name, pic, type, data1, data2, data3) VALUES ('Helmet of the Noob', 0, 3, 5, 7, 0);")
+
+        # insert sample spell 'Enflame' to class 'Mage'
+        self.sendQuery("INSERT INTO spells (name, pic, type, reqmp, reqclass, reqlevel, data1, data2, data3) VALUES ('Enflame', 0, 3, 4, 1, 1, 4, 0, 0);")
+
 
         # add item "Noob Helmet" to character 'Admin'
         self.sendQuery("INSERT INTO inventory (character_id, item_id, value, durability) VALUES (1, 2, 1, 25);")
@@ -517,8 +529,50 @@ def checkItems():
 
 # Spells
 def saveSpell(spellNum):
-    # todo
-    print 'todo'
+    # todo: rework the id part
+
+    # check if spell already exists
+    query = database.sendQuery("SELECT * FROM spells WHERE id=%i;" % (spellNum+1))
+    rows = query.fetchone()
+
+    if rows == None:
+        # spell doesnt exist, create it
+        query = database.sendQuery("INSERT INTO spells (id, name, pic, type, reqmp, reqclass, reqlevel data1, data2, data3) \
+                                                           VALUES (%i, '%s', %i, %i, %i, %i, %i, %i, %i, %i);" \
+                                                           % (int(spellNum+1),             \
+                                                              Spell[spellNum].name,  \
+                                                              Spell[spellNum].pic,   \
+                                                              Spell[spellNum].type,  \
+                                                              Spell[spellNum].reqMp, \
+                                                              Spell[spellNum].reqClass, \
+                                                              Spell[spellNum].reqLevel, \
+                                                              Spell[spellNum].data1, \
+                                                              Spell[spellNum].data2, \
+                                                              Spell[spellNum].data3))
+
+    elif len(rows) > 0:
+        # spell already exists, so update the spell
+        query = database.sendQuery("UPDATE spells SET name=?, \
+                                                          pic=?, \
+                                                          type=?, \
+                                                          reqmp=?, \
+                                                          reqclass=?, \
+                                                          reqlevel=?, \
+                                                          data1=?, \
+                                                          data2=?, \
+                                                          data3=? \
+                                                          WHERE id=?;", (Spell[spellNum].name,  \
+                                                                           Spell[spellNum].pic,   \
+                                                                           Spell[spellNum].type,  \
+                                                                           Spell[spellNum].reqMp, \
+                                                                           Spell[spellNum].reqClass, \
+                                                                           Spell[spellNum].reqLevel, \
+                                                                           Spell[spellNum].data1, \
+                                                                           Spell[spellNum].data2, \
+                                                                           Spell[spellNum].data3, \
+                                                                           int(spellNum+1)))
+
+    database.saveChanges()
 
 def saveSpells():
     print 'Saving spells...'
@@ -526,7 +580,25 @@ def saveSpells():
         saveSpell(i)
 
 def loadSpells():
-    print 'todo'
+    #checkItems()
+    # get max classes
+    spellAmount = database.getNumberOfRows('spells')
+
+    for i in range(0, spellAmount):
+        query = database.sendQuery("SELECT * FROM spells WHERE id=%i;" % (i+1))
+        rows = query.fetchone()
+
+        Spell[i].name = rows['name']
+        Spell[i].pic = rows['pic']
+        Spell[i].type = rows['type']
+
+        Spell[i].reqMp = rows['reqmp']
+        Spell[i].reqClass = rows['reqclass']
+        Spell[i].reqLevel = rows['reqlevel']
+
+        Spell[i].data1 = rows['data1']
+        Spell[i].data2 = rows['data2']
+        Spell[i].data3 = rows['data3']
 
 def clearSpell(index):
     Spell[index] = SpellClass()

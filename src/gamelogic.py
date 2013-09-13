@@ -320,7 +320,7 @@ def joinGame(index):
     sendItems(index)
     sendNpcs(index)
     # shops
-    # spells
+    sendSpells(index)
     sendInventory(index)
     sendWornEquipment(index)
 
@@ -1613,6 +1613,19 @@ def sendEditItem(index):
 
 def sendSpellEditor(index):
     packet = json.dumps([{"packet": ServerPackets.SSpellEditor}])
+    g.conn.sendDataTo(index, packet)
+
+def sendSpells(index):
+    for i in range(MAX_SPELLS):
+        if len(Spell[i].name) > 0:
+            sendUpdateSpellTo(index, i)
+
+def sendUpdateSpellToAll(spellNum):
+    packet = json.dumps([{"packet": ServerPackets.SUpdateSpell, "spellnum": spellNum, "spellname": Spell[spellNum].name, "pic": Spell[spellNum].pic, "reqmp": Spell[spellNum].reqMp}])
+    g.conn.sendDataToAll(packet)
+
+def sendUpdateSpellTo(index, spellNum):
+    packet = json.dumps([{"packet": ServerPackets.SUpdateSpell, "spellnum": spellNum, "spellname": Spell[spellNum].name, "pic": Spell[spellNum].pic, "reqmp": Spell[spellNum].reqMp}])
     g.conn.sendDataTo(index, packet)
 
 def sendNpcs(index):

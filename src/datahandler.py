@@ -97,6 +97,9 @@ class DataHandler():
         elif packetType == ClientPackets.CRequestEditSpell:
             self.handleRequestEditSpell(index)
 
+        elif packetType == ClientPackets.CEditSpell:
+            self.handleEditSpell(index, jsonData)
+
         elif packetType == ClientPackets.CSaveSpell:
             self.handleSaveSpell(index, jsonData)
 
@@ -678,6 +681,20 @@ class DataHandler():
             hackingAttempt(index, 'Admin Cloning')
 
         sendSpellEditor(index)
+
+    def handleEditSpell(self, index, jsonData):
+        if getPlayerAccess(index) < ADMIN_DEVELOPER:
+            hackingAttempt(index, 'Admin Cloning')
+            return
+
+        spellNum = jsonData[0]['spellnum']
+
+        # prevent hacking
+        if spellNum < 0 or spellNum > MAX_SPELLS:
+            hackingAttempt(index, 'Invalid Spell Index')
+
+        g.connectionLogger.info(getPlayerName(index) + ' editing spell #' + str(spellNum) + '.')
+        sendEditSpellTo(index, spellNum)
 
     def handleSaveSpell(self, index, jsonData):
         if getPlayerAccess(index) < ADMIN_DEVELOPER:

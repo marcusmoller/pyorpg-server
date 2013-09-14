@@ -1615,6 +1615,10 @@ def sendSpellEditor(index):
     packet = json.dumps([{"packet": ServerPackets.SSpellEditor}])
     g.conn.sendDataTo(index, packet)
 
+def sendEditSpellTo(index, spellNum):
+    packet = json.dumps([{"packet": ServerPackets.SEditSpell, "spellnum": spellNum, "spellname": Spell[spellNum].name, "pic": Spell[spellNum].pic, "reqmp": Spell[spellNum].reqMp, 'reqclass': Spell[spellNum].reqClass, 'reqlevel': Spell[spellNum].reqLevel, 'type': Spell[spellNum].type, 'data1': Spell[spellNum].data1, 'data2': Spell[spellNum].data2, 'data3': Spell[spellNum].data3}])
+    g.conn.sendDataTo(index, packet)
+
 def sendSpells(index):
     for i in range(MAX_SPELLS):
         if len(Spell[i].name) > 0:

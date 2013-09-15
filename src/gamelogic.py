@@ -1089,10 +1089,19 @@ def findOpenInvSlot(index, itemNum):
 
     return None
 
+def findOpenSpellSlot(index):
+    for i in range(MAX_PLAYER_SPELLS):
+        if getPlayerSpell(index, i) is None:
+            return i
+
+    return None
+
 def hasSpell(index, spellNum):
     for i in range(MAX_PLAYER_SPELLS):
         if getPlayerSpell(index, i) == spellNum:
             return True
+
+    return False
 
 def hasItem(index, itemNum):
     if not isPlaying(index) or itemNum < 0 or itemNum > MAX_ITEMS:
@@ -1844,12 +1853,24 @@ def sendSpells(index):
         if len(Spell[i].name) > 0:
             sendUpdateSpellTo(index, i)
 
+def sendPlayerSpells(index):
+    packet = []
+    packet.append({"packet": ServerPackets.SSpells})
+
+    for i in range(0, MAX_PLAYER_SPELLS):
+        if getPlayerSpell(index, i) is not None:
+            packet.append({"slot": i,
+                           "spellnum": getPlayerSpell(index, i)})
+
+    nPacket = json.dumps(packet)
+    g.conn.sendDataTo(index, nPacket)
+
 def sendUpdateSpellToAll(spellNum):
-    packet = json.dumps([{"packet": ServerPackets.SUpdateSpell, "spellnum": spellNum, "spellname": Spell[spellNum].name, "pic": Spell[spellNum].pic, "reqmp": Spell[spellNum].reqMp}])
+    packet = json.dumps([{"packet": ServerPackets.SUpdateSpell, "spellnum": spellNum, "spellname": Spell[spellNum].name, "pic": Spell[spellNum].pic, "reqmp": Spell[spellNum].reqMp, 'type': Spell[spellNum].type, 'data1': Spell[spellNum].data1}])
     g.conn.sendDataToAll(packet)
 
 def sendUpdateSpellTo(index, spellNum):
-    packet = json.dumps([{"packet": ServerPackets.SUpdateSpell, "spellnum": spellNum, "spellname": Spell[spellNum].name, "pic": Spell[spellNum].pic, "reqmp": Spell[spellNum].reqMp}])
+    packet = json.dumps([{"packet": ServerPackets.SUpdateSpell, "spellnum": spellNum, "spellname": Spell[spellNum].name, "pic": Spell[spellNum].pic, "reqmp": Spell[spellNum].reqMp, 'type': Spell[spellNum].type, 'data1': Spell[spellNum].data1}])
     g.conn.sendDataTo(index, packet)
 
 def sendNpcs(index):

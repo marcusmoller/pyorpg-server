@@ -52,6 +52,9 @@ class DataHandler():
         elif packetType == ClientPackets.CAttack:
             self.handleAttack(index)
 
+        elif packetType == ClientPackets.CSpells:
+            self.handleSpells(index)
+
         elif packetType == ClientPackets.CPlayerInfoRequest:
             self.handlePlayerInfoRequest(index, jsonData)
 
@@ -325,7 +328,42 @@ class DataHandler():
 
                 sendWornEquipment(index)
 
-            # todo: potions, spells, keys
+            elif itemType == ITEM_TYPE_SPELL:
+                # spell num
+                spellNum = Item[getPlayerInvItemNum(index, invNum)].data1
+
+                if spellNum != None:
+                    # make sure they are the right class
+                    if int(1 if Spell[spellNum].reqClass is None else Spell[spellNum].reqClass) - 1 == getPlayerClass(index) or Spell[n].reqClass is None:
+                        # make sure they are the right level
+                        levelReq = Spell[spellNum].reqLevel
+
+                        if levelReq <= getPlayerLevel(index):
+                            i = findOpenSpellSlot(index)
+
+                            if i is not None:
+                                if not hasSpell(index, spellNum):
+                                    setPlayerSpell(index, i, spellNum)
+                                    takeItem(index, getPlayerInvItemNum(index, invNum), 0)
+                                    playerMsg(index, 'You study the spell carefully...', textColor.YELLOW)
+                                    playerMsg(index, 'You have learned a new spell!', textColor.WHITE)
+
+                                else:
+                                    playerMsg(index, 'You have already learned this spell!', textColor.BRIGHT_RED)
+
+                            else:
+                                playerMsg(index, 'You have learned all that you can learn!', textColor.BRIGHT_RED)
+
+                        else:
+                            playerMsg(index, 'You must be level ' + str(levelReq) + ' to learn this spell.', textColor.WHITE)
+
+                    else:
+                        playerMsg(index, 'This spell can only be learned by a '+ getClassName(Spell[spellNum].reqClass) + '.', textColor.WHITE)
+
+                else:
+                    playerMsg(index, 'An error occured with the spell. Please inform an admin!', textColor.WHITE)
+
+            # todo: potions, keys
 
     def handleTarget(self, index, jsonData):
         x = jsonData[0]['x']
@@ -427,6 +465,8 @@ class DataHandler():
                 else:
                     playerMsg(index, 'Your attack does nothing.', textColor.BRIGHT_RED)
 
+    def handleSpells(self, index):
+        sendPlayerSpells(index)
 
     def handlePlayerInfoRequest(self, index, jsonData):
         name = jsonData[0]['name']

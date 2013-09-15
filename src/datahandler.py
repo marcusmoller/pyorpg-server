@@ -370,7 +370,6 @@ class DataHandler():
 
     def handleCastSpell(self, index, jsonData):
         spellSlot = jsonData[0]['spellslot']
-        print spellSlot
         castSpell(index, spellSlot)
 
     def handleTarget(self, index, jsonData):

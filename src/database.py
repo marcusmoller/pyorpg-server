@@ -76,10 +76,15 @@ class Database():
 
         # create table 'inventory'
         self.sendQuery("CREATE TABLE inventory (id INTEGER PRIMARY KEY AUTOINCREMENT, \
-                                              character_id TEXT, \
-                                              item_id INTEGER, \
-                                              value INTEGER, \
-                                              durability INTEGER);")
+                                                character_id INTEGER, \
+                                                item_id INTEGER, \
+                                                value INTEGER, \
+                                                durability INTEGER);")
+
+        # create table 'spellbook'
+        self.sendQuery("CREATE TABLE spellbook (id INTEGER PRIMARY KEY AUTOINCREMENT, \
+                                                character_id INTEGER, \
+                                                spellnum INTEGER);")
 
         # create table 'npcs'
         self.sendQuery("CREATE TABLE npcs (id INTEGER PRIMARY KEY AUTOINCREMENT, \
@@ -107,12 +112,14 @@ class Database():
         self.sendQuery("INSERT INTO items (name, pic, type, data1, data2, data3) VALUES ('Gold', 3, 12, 0, 0, 0);")
         self.sendQuery("INSERT INTO items (name, pic, type, data1, data2, data3) VALUES ('Helmet of the Noob', 0, 3, 5, 7, 0);")
 
-        # insert sample spell 'Enflame' to class 'Mage'
-        self.sendQuery("INSERT INTO spells (name, pic, type, reqmp, reqclass, reqlevel, data1, data2, data3) VALUES ('Enflame', 0, 3, 4, 1, 1, 4, 0, 0);")
-
+        # insert sample spell 'Enflame'
+        self.sendQuery("INSERT INTO spells (name, pic, type, reqmp, reqclass, reqlevel, data1, data2, data3) VALUES ('Enflame', 0, 3, 4, None, 1, 4, 0, 0);")
 
         # add item "Noob Helmet" to character 'Admin'
         self.sendQuery("INSERT INTO inventory (character_id, item_id, value, durability) VALUES (1, 2, 1, 25);")
+
+        # add spell 'Enflame' to character 'Admin'
+        self.sendQuery("INSERT INTO spellbook (character_id, spellnum) VALUES (1, 1);")
 
         self.saveChanges()
         g.serverLogger.info('Database has been created!')
@@ -313,7 +320,6 @@ def savePlayer(index):
         for i in range(MAX_INV):
             if getPlayerInvItemNum(index, i) != None:
                 # add item to inventory if its not already there
-
                 itemNum = getPlayerInvItemNum(index, i)
 
                 # check if its already there
@@ -335,6 +341,24 @@ def savePlayer(index):
                     rowId = invRows['id']
                     invQuery = database.sendQuery('UPDATE inventory SET value=%i, durability=%i WHERE id=%i;' % (getPlayerInvItemValue(index, i), getPlayerInvItemDur(index, i), rowId))
 
+        for i in range(MAX_PLAYER_SPELLS):
+            if getPlayerSpell(index, i) is not None:
+                spellNum = getPlayerSpell(index, i)
+
+                # check if its already there
+                spbQuery = database.sendQuery("SELECT * FROM spellbook WHERE (character_id=%i AND spellnum=%i);" % (charId, (spellNum+1)))
+                spbRows = query.fetchone()
+
+                if spbRows is None:
+                    # doesnt exist, so add the spell
+                    spbQuery = database.sendQuery('INSERT INTO spellbook (character_id, spellnum) \
+                                                               VALUES (?, ?, ?, ?);', \
+                                                                 (charId, \
+                                                                 spellNum+1))
+
+                elif len(spbRows) > 0:
+                    # item is already there, so do nothing
+                    continue
 
     database.saveChanges()
 
@@ -395,6 +419,20 @@ def loadPlayer(index, name):
                     Player[index].char[i].inv[j].num = invRow[j]['item_id']-1
                     Player[index].char[i].inv[j].value = invRow[j]['value']
                     Player[index].char[i].inv[j].dur = invRow[j]['durability']
+
+                except:
+                    break
+
+            print 'todo'
+
+            # load spellbook
+            spbQuery = database.sendQuery("SELECT * FROM spellbook WHERE character_id=%i;" % charId)
+            spbRow = spbQuery.fetchall()
+
+            for k in range(len(spbRow)):
+                print k
+                try:
+                    setPlayerSpell(index, k, spbRow[k]['spellnum']-1)
 
                 except:
                     break

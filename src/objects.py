@@ -170,7 +170,7 @@ class SpellClass():
 
         self.reqMp = 0
         self.reqClass = None
-        self.reqLevel = None
+        self.reqLevel = 0
 
         self.type = None
         self.data1 = 0

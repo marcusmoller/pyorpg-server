@@ -299,11 +299,13 @@ def castSpell(index, spellSlot):
     reqMp = Spell[spellNum].reqMp
 
     # check if they have enough mp
-    if getPlayerVital(index, vitals.mp) < reqMp:
+    if getPlayerVital(index, Vitals.mp) < reqMp:
         playerMsg(index, 'Not enough mana points!', textColor.BRIGHT_RED)
+        return
 
     # check if timer is ok
-    if time.time() < TempPlayer[index].attackTimer + 1000:
+    tickCount = time.time()*1000
+    if tickCount < TempPlayer[index].attackTimer + 1000:
         return
 
     # ** SELF CAST SPELLS **
@@ -315,8 +317,8 @@ def castSpell(index, spellSlot):
             mapMsg(getPlayerMap(index), getPlayerMap(index) + ' casts ' + Spell[spellNum].name + '.', textColor.BRIGHT_BLUE)
 
             # take mana points
-            setPlayerVital(index, vitals.mp, getPlayerVital(index, vitals.mp) - reqMp)
-            sendVital(index, vitals.mp)
+            setPlayerVital(index, Vitals.mp, getPlayerVital(index, Vitals.mp) - reqMp)
+            sendVital(index, Vitals.mp)
 
             casted = True
 
@@ -332,7 +334,7 @@ def castSpell(index, spellSlot):
     if targetType == TARGET_TYPE_PLAYER:
         if isPlaying(n):
 
-            if getPlayerVital(index, vitals.hp) > 0:
+            if getPlayerVital(index, Vitals.hp) > 0:
                 if getPlayerMap(index) == getPlayerMap(n):
                     # check player level?
 
@@ -348,7 +350,7 @@ def castSpell(index, spellSlot):
 
                 if canCast:
                     if Spell[spellNum].type == SPELL_TYPE_SUBHP:
-                        damage = (getPlayerStat(index, stats.magic) // 4) + Spell[spellNum].data1 - getPlayerProtection(n)
+                        damage = (getPlayerStat(index, Stats.magic) // 4) + Spell[spellNum].data1 - getPlayerProtection(n)
 
                         if damage > 0:
                             attackPlayer(index, n, damage)
@@ -357,11 +359,11 @@ def castSpell(index, spellSlot):
                             playerMsg(index, 'The spell was too weak to hurt ' + getPlayerName(n) + '!', textColor.BRIGHT_RED)
 
                     elif Spell[spellNum].type == SPELL_TYPE_SUBMP:
-                        setPlayerVital(n, vitals.mp, getPlayerVital(n, vitals.mp) - Spell[spellNum].data1)
-                        sendVital(n, vitals.mp)
+                        setPlayerVital(n, Vitals.mp, getPlayerVital(n, Vitals.mp) - Spell[spellNum].data1)
+                        sendVital(n, Vitals.mp)
 
                     elif Spell[spellNum].type == SPELL_TYPE_SUBSP:
-                        setPlayerVital(n, vitals.sp, getPlayerVital(n, vitals.sp) - Spell[spellNum].data1)
+                        setPlayerVital(n, Vitals.sp, getPlayerVital(n, Vitals.sp) - Spell[spellNum].data1)
                         sendVital(n, vitals.sp)
 
                     casted = True
@@ -373,31 +375,31 @@ def castSpell(index, spellSlot):
 
                 if canCast:
                     if Spell[spellNum].type == SPELL_TYPE_ADDHP:
-                        setPlayerVital(n, vitals.hp, getPlayerVital(n, vitals.hp) + Spell[spellNum].data1)
-                        sendVital(n, vitals.hp)
+                        setPlayerVital(n, Vitals.hp, getPlayerVital(n, Vitals.hp) + Spell[spellNum].data1)
+                        sendVital(n, Vitals.hp)
 
                     elif Spell[spellNum].type == SPELL_TYPE_ADDMP:
-                        setPlayerVital(n, vitals.mp, getPlayerVital(n, vitals.mp) + Spell[spellNum].data1)
-                        sendVital(n, vitals.mp)
+                        setPlayerVital(n, Vitals.mp, getPlayerVital(n, Vitals.mp) + Spell[spellNum].data1)
+                        sendVital(n, Vitals.mp)
 
                     elif Spell[spellNum].type == SPELL_TYPE_ADDSP:
-                        setPlayerVital(n, vitals.sp, getPlayerVital(n, vitals.sp) + Spell[spellNum].data1)
-                        sendVital(n, vitals.sp)
+                        setPlayerVital(n, Vitals.sp, getPlayerVital(n, Vitals.sp) + Spell[spellNum].data1)
+                        sendVital(n, Vitals.sp)
 
                     casted = True
 
     elif targetType == TARGET_TYPE_NPC:
-        if Npc[mapNPC[getPlayerMap(index)][n].num].behaviour != NPC_BEHAVIOUR_FRIENDLY and Npc[mapNPC[getPlayerMap(index)][n].num].behaviour != NPC_BEHAVIOUR_SHOPKEEPER:
+        if NPC[mapNPC[getPlayerMap(index)][n].num].behaviour != NPC_BEHAVIOUR_FRIENDLY and NPC[mapNPC[getPlayerMap(index)][n].num].behaviour != NPC_BEHAVIOUR_SHOPKEEPER:
             canCast = True
 
-        targetName = Npc[mapNPC[getPlayerMap(index)][n].num].name
+        targetName = NPC[mapNPC[getPlayerMap(index)][n].num].name
 
         if canCast:
             if Spell[spellNum].type == SPELL_TYPE_ADDHP:
-                mapNPC[getPlayerMap(index)][n].vital[vitals.hp] += Spell[spellNum].data1
+                mapNPC[getPlayerMap(index)][n].vital[Vitals.hp] += Spell[spellNum].data1
 
             elif Spell[spellNum].type == SPELL_TYPE_SUBHP:
-                damage = (getPlayerStat(index, stats.magic) // 4) + Spell[spellNum].data1 - (Npc[mapNPC[getPlayerMap(index)][n].num].stat[stats.defense] // 2)
+                damage = (getPlayerStat(index, Stats.magic) // 4) + Spell[spellNum].data1 - (NPC[mapNPC[getPlayerMap(index)][n].num].stat[Stats.defense] // 2)
 
                 if damage > 0:
                     attackNpc(index, n, damage)
@@ -406,34 +408,33 @@ def castSpell(index, spellSlot):
                     playerMsg(index, 'The spell was too weak to hurt ' + targetName + '!', textColor.BRIGHT_RED)
 
             elif Spell[spellNum].type == SPELL_TYPE_ADDMP:
-                mapNPC[getPlayerMap(index)][n].vital[vitals.mp] += Spell[spellNum].data1
+                mapNPC[getPlayerMap(index)][n].vital[Vitals.mp] += Spell[spellNum].data1
 
             elif Spell[spellNum].type == SPELL_TYPE_SUBMP:
-                mapNPC[getPlayerMap(index)][n].vital[vitals.mp] -= Spell[spellNum].data1
+                mapNPC[getPlayerMap(index)][n].vital[Vitals.mp] -= Spell[spellNum].data1
 
             elif Spell[spellNum].type == SPELL_TYPE_ADDSP:
-                mapNPC[getPlayerMap(index)][n].vital[vitals.sp] += Spell[spellNum].data1
+                mapNPC[getPlayerMap(index)][n].vital[Vitals.sp] += Spell[spellNum].data1
 
             elif Spell[spellNum].type == SPELL_TYPE_SUBSP:
-                mapNPC[getPlayerMap(index)][n].vital[vitals.sp] -= Spell[spellNum].data1
+                mapNPC[getPlayerMap(index)][n].vital[Vitals.sp] -= Spell[spellNum].data1
 
             casted = True
 
     if casted:
         mapMsg(getPlayerMap(index), getPlayerName(index) + ' casts ' + Spell[spellNum].name + ' on ' + targetName + '.', textColor.BRIGHT_BLUE)
-        #sendDataToMap
+        packet = json.dumps([{"packet": ServerPackets.SCastSpell, "targettype": targetType, "target": n, "spellnum": spellNum}])
+        g.conn.sendDataToMap(getPlayerMap(index), packet)
 
         # take away mana points
-        setPlayerVital(index, vitals.mp, getPlayerVital(index, vitals.mp) - reqMp)
-        sendVital(index, vitals.mp)
+        setPlayerVital(index, Vitals.mp, getPlayerVital(index, Vitals.mp) - reqMp)
+        sendVital(index, Vitals.mp)
 
-        TempPlayer[index].attackTimer = time.time()
+        TempPlayer[index].attackTimer = tickCount / 1000
         TempPlayer[index].castedSpell = True
 
-
-
-
-
+    else:
+        playerMsg(index, 'Could not cast spell!', textColor.BRIGHT_RED)
 
 def playerWarp(index, mapNum, x, y):
     if mapNum < 0 or mapNum > MAX_MAPS:

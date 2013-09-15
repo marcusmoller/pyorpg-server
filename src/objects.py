@@ -168,7 +168,7 @@ class SpellClass():
         self.name = ''
         self.pic = None
 
-        self.reqMp = None
+        self.reqMp = 0
         self.reqClass = None
         self.reqLevel = None
 

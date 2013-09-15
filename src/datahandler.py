@@ -46,6 +46,9 @@ class DataHandler():
         elif packetType == ClientPackets.CUseItem:
             self.handleUseItem(index, jsonData)
 
+        elif packetType == ClientPackets.CCast:
+            self.handleCastSpell(index, jsonData)
+
         elif packetType == ClientPackets.CTarget:
             self.handleTarget(index, jsonData)
 
@@ -364,6 +367,11 @@ class DataHandler():
                     playerMsg(index, 'An error occured with the spell. Please inform an admin!', textColor.WHITE)
 
             # todo: potions, keys
+
+    def handleCastSpell(self, index, jsonData):
+        spellSlot = jsonData[0]['spellslot']
+        print spellSlot
+        castSpell(index, spellSlot)
 
     def handleTarget(self, index, jsonData):
         x = jsonData[0]['x']

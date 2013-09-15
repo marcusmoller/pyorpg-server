@@ -443,11 +443,11 @@ def updateNpcAi():
                 if mapNPC[i][j].num is not None:
                     if tickCount > lastRegenNpcHp + 10000:
                         if mapNPC[i][j].vital[Vitals.hp] > 0:
-                            mapNPC[i][j].vital[Vitals.hp] += getNpcVitalRegen(npcNum, vitals.hp)
+                            mapNPC[i][j].vital[Vitals.hp] += getNpcVitalRegen(npcNum, Vitals.hp)
 
                             # check if they have more than they should, then set it to max
-                            if mapNPC[i][j].vital[Vitals.hp] > getNpcMaxVital(npcNum, vitals.hp):
-                                mapNPC[i][j].vital[Vitals.hp] = getNpcMaxVital(npcNum, vitals.hp)
+                            if mapNPC[i][j].vital[Vitals.hp] > getNpcMaxVital(npcNum, Vitals.hp):
+                                mapNPC[i][j].vital[Vitals.hp] = getNpcMaxVital(npcNum, Vitals.hp)
 
                     lastRegenNpcHp = tickCount
 

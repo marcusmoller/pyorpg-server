@@ -430,7 +430,7 @@ def castSpell(index, spellSlot):
         setPlayerVital(index, Vitals.mp, getPlayerVital(index, Vitals.mp) - reqMp)
         sendVital(index, Vitals.mp)
 
-        TempPlayer[index].attackTimer = tickCount / 1000
+        TempPlayer[index].attackTimer = tickCount
         TempPlayer[index].castedSpell = True
 
     else:
@@ -1808,6 +1808,9 @@ def sendLeftGame(index):
     packet = json.dumps([{"packet": ServerPackets.SPlayerData, "index": index, "sprite": 0, "name": "", "access": 0, "map": 0, "x": 0, "y": 0, "direction": 0}])
     g.conn.sendDataToAllBut(index, packet)
 
+def sendPlayerXY(index):
+    packet = json.dumps([{'packet': ServerPackets.SPlayerXY, 'x': getPlayerX(index), 'y': getPlayerY(index)}])
+    g.conn.sendDataTo(index, packet)
 
 def sendUpdateItemToAll(itemNum):
     packet = json.dumps([{"packet": ServerPackets.SUpdateItem, "itemnum": itemNum, "itemname": Item[itemNum].name, "itempic": Item[itemNum].pic, "itemtype": Item[itemNum].type, "itemdata1": Item[itemNum].data1, "itemdata2": Item[itemNum].data2, "itemdata3": Item[itemNum].data3}])

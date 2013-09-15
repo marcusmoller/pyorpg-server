@@ -266,8 +266,31 @@ class DataHandler():
 
     ''' Player movement '''
     def handlePlayerMove(self, index, jsonData):
+        if TempPlayer[index].gettingMap:
+            return
+
         direction = jsonData[0]["direction"]
         movement = jsonData[0]["moving"]
+
+        # prevent hacking
+        if direction < DIR_UP or direction > DIR_RIGHT:
+            hackingAttempt(index, 'Invalid Direction')
+
+        # prevent hacking
+        if movement < 1 or movement > 2:
+            hackingAttempt(index, 'Invalid Movement')
+
+        # prevent player from moving if they have casted a spell
+        if TempPlayer[index].castedSpell:
+            # check if they have already casted a spell and if so we cant let them move
+            tickCount = time.time() * 1000
+            if tickCount > TempPlayer[index].attackTimer + 1000:
+                TempPlayer[index].castedSpell = False
+
+            else:
+                sendPlayerXY(index)
+                return
+
         playerMove(index, direction, movement)
 
     ''' Player direction '''

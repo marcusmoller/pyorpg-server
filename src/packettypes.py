@@ -71,6 +71,7 @@ class ServerPackets:
     SPlayerData, \
     SPlayerMove, \
     SPlayerDir,  \
+    SPlayerXY,   \
     SAttack,     \
     SSpellCast,  \
     SNpcMove,    \
@@ -105,7 +106,7 @@ class ServerPackets:
     SMapList, \
     SLeft,       \
     SHighIndex   \
-    = range(51)
+    = range(52)
 
 
 class MessagePackets:

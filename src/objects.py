@@ -98,7 +98,7 @@ class TempPlayerClass():
         self.attackTimer = 0
         self.target = 0
 
-        self.castedSpell = None
+        self.castedSpell = False
 
         self.partyPlayer = None
         self.inParty = False

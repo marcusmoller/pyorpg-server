@@ -39,6 +39,9 @@ MAX_MAPS = 100
 MAX_MAPX = 15
 MAX_MAPY = 11
 
+MAP_MORAL_NONE = 0
+MAP_MORAL_SAFE = 1
+
 # text colors
 class textColor():
     BLACK      = (  0,   0,   0)
@@ -73,6 +76,8 @@ joinLeftColor  = textColor.DARK_GREY
 npcColor       = textColor.BROWN
 alertColor     = textColor.RED
 newMapColor    = textColor.PINK
+
+UI_FONT_COLOR = (251, 230, 204)
 
 # tile constants
 TILE_TYPE_WALKABLE = 0
@@ -121,6 +126,11 @@ NPC_BEHAVIOUR_ATTACKWHENATTACKED = 1
 NPC_BEHAVIOUR_FRIENDLY = 2
 NPC_BEHAVIOUR_SHOPKEEPER = 3
 NPC_BEHAVIOUR_GUARD = 4
+
+# target type constants
+TARGET_TYPE_NONE = 0
+TARGET_TYPE_PLAYER = 1
+TARGET_TYPE_NPC = 2
 
 # game editor constants
 EDITOR_NONE  = 0

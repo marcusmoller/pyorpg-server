@@ -98,6 +98,8 @@ class TempPlayerClass():
         self.attackTimer = 0
         self.target = 0
 
+        self.castedSpell = None
+
         self.partyPlayer = None
         self.inParty = False
 
@@ -121,7 +123,7 @@ class TileClass():
 
 class MapClass():
     def __init__(self):
-        self.name = ""
+        self.name = ''
         self.revision = 0
         self.moral = None
         self.tileSet = 1

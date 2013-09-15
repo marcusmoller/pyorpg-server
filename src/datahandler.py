@@ -46,6 +46,9 @@ class DataHandler():
         elif packetType == ClientPackets.CUseItem:
             self.handleUseItem(index, jsonData)
 
+        elif packetType == ClientPackets.CTarget:
+            self.handleTarget(index, jsonData)
+
         elif packetType == ClientPackets.CAttack:
             self.handleAttack(index)
 
@@ -323,6 +326,54 @@ class DataHandler():
                 sendWornEquipment(index)
 
             # todo: potions, spells, keys
+
+    def handleTarget(self, index, jsonData):
+        x = jsonData[0]['x']
+        y = jsonData[0]['y']
+
+        if x < 0 or x > MAX_MAPX or y < 0 or y > MAX_MAPY:
+            return
+
+        # check for player
+        for i in range(len(g.playersOnline)):
+            if getPlayerMap(index) == getPlayerMap(g.playersOnline[i]):
+                if getPlayerX(g.playersOnline[i]) == x and getPlayerY(g.playersOnline[i]) == y:
+                    # consider the player
+                    if g.playersOnline[i] != index:
+
+                        if getPlayerLevel(g.playersOnline[i]) >= getPlayerLevel(index) + 5:
+                            playerMsg(index, 'You wouldn\'t stand a chance.', textColor.BRIGHT_RED)
+
+                        elif getPlayerLevel(g.playersOnline[i]) > getPlayerLevel(index):
+                                playerMsg(index, 'This one seems to have an advantage over you.', textColor.YELLOW)
+
+                        elif getPlayerLevel(g.playersOnline[i]) == getPlayerLevel(index):
+                                playerMsg(index, 'This would be an even fight.', textColor.WHITE)
+
+                        elif getPlayerLevel(g.playersOnline[i]) + 5 <= getPlayerLevel(index):
+                                playerMsg(index, 'You could slaughter that player.', textColor.BRIGHT_BLUE)
+
+                        elif getPlayerLevel(g.playersOnline[i]) < getPlayerLevel(index):
+                                playerMsg(index, 'You would have an advantage over that player.', textColor.YELLOW)
+
+
+
+                        # change the target
+                        TempPlayer[index].target = g.playersOnline[i]
+                        TempPlayer[index].targetType = TARGET_TYPE_PLAYER
+                        playerMsg(index, 'Your target is now ' + getPlayerName(g.playersOnline[i]) + '.', textColor.YELLOW)
+                        return
+
+        # check for npc
+        for i in range(MAX_MAP_NPCS):
+            if mapNPC[getPlayerMap(index)][i].num is not None:
+                if mapNPC[getPlayerMap(index)][i].x == x and mapNPC[getPlayerMap(index)][i].y == y:
+                    # change the target
+                    TempPlayer[index].target = i
+                    TempPlayer[index].targetType = TARGET_TYPE_NPC
+                    playerMsg(index, 'Your target is now a ' + NPC[mapNPC[getPlayerMap(index)][i].num].name + '.', textColor.YELLOW)
+                    return
+
 
 
     def handleAttack(self, index):

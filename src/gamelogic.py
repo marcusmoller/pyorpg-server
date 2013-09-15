@@ -282,8 +282,169 @@ def canPlayerBlockHit(index):
 
     return False
 
+def castSpell(index, spellSlot):
+    if spellSlot < 0 or spellSlot > MAX_PLAYER_SPELLS:
+        return
+
+    spellNum = getPlayerSpell(index, spellSlot)
+    casted = False
+
+    # make sure player has spell
+    if not hasSpell(index, spellNum):
+        playerMsg(index, 'You do not have this spell!', textColor.BRIGHT_RED)
+        return
+
+    # does not check for level yet
+
+    reqMp = Spell[spellNum].reqMp
+
+    # check if they have enough mp
+    if getPlayerVital(index, vitals.mp) < reqMp:
+        playerMsg(index, 'Not enough mana points!', textColor.BRIGHT_RED)
+
+    # check if timer is ok
+    if time.time() < TempPlayer[index].attackTimer + 1000:
+        return
+
+    # ** SELF CAST SPELLS **
+    if Spell[spellNum].type == SPELL_TYPE_GIVEITEM:
+        n = findOpenInvSlot(index, Spell[spellNum].data1)
+
+        if n is not None:
+            giveItem(index, Spell[spellNum].data1, Spell[spellNum].data2)
+            mapMsg(getPlayerMap(index), getPlayerMap(index) + ' casts ' + Spell[spellNum].name + '.', textColor.BRIGHT_BLUE)
+
+            # take mana points
+            setPlayerVital(index, vitals.mp, getPlayerVital(index, vitals.mp) - reqMp)
+            sendVital(index, vitals.mp)
+
+            casted = True
+
+        else:
+            playerMsg(index, 'Your inventory is full!', textColor.BRIGHT_RED)
+
+        return
+
+    n = TempPlayer[index].target
+    targetType = TempPlayer[index].targetType
+    canCast = False
+
+    if targetType == TARGET_TYPE_PLAYER:
+        if isPlaying(n):
+
+            if getPlayerVital(index, vitals.hp) > 0:
+                if getPlayerMap(index) == getPlayerMap(n):
+                    # check player level?
+
+                    if Map[getPlayerMap(index)].moral == MAP_MORAL_NONE:
+                        if getPlayerAccess(index) <= 0:
+                            if getPlayerAccess(n) <= 0:
+                                if n != index:
+                                    canCast = True
+
+            targetName = getPlayerName(n)
+
+            if Spell[spellNum].type == SPELL_TYPE_SUBHP or Spell[spellNum].type == SPELL_TYPE_SUBMP or Spell[spellNum].type == SPELL_TYPE_SUBSP:
+
+                if canCast:
+                    if Spell[spellNum].type == SPELL_TYPE_SUBHP:
+                        damage = (getPlayerStat(index, stats.magic) // 4) + Spell[spellNum].data1 - getPlayerProtection(n)
+
+                        if damage > 0:
+                            attackPlayer(index, n, damage)
+
+                        else:
+                            playerMsg(index, 'The spell was too weak to hurt ' + getPlayerName(n) + '!', textColor.BRIGHT_RED)
+
+                    elif Spell[spellNum].type == SPELL_TYPE_SUBMP:
+                        setPlayerVital(n, vitals.mp, getPlayerVital(n, vitals.mp) - Spell[spellNum].data1)
+                        sendVital(n, vitals.mp)
+
+                    elif Spell[spellNum].type == SPELL_TYPE_SUBSP:
+                        setPlayerVital(n, vitals.sp, getPlayerVital(n, vitals.sp) - Spell[spellNum].data1)
+                        sendVital(n, vitals.sp)
+
+                    casted = True
+
+            elif Spell[spellNum].type == SPELL_TYPE_ADDHP or Spell[spellNum].type == SPELL_TYPE_ADDMP or Spell[spellNum].type == SPELL_TYPE_ADDSP:
+                
+                if getPlayerMap(index) == getPlayerMap(n):
+                    canCast = True
+
+                if canCast:
+                    if Spell[spellNum].type == SPELL_TYPE_ADDHP:
+                        setPlayerVital(n, vitals.hp, getPlayerVital(n, vitals.hp) + Spell[spellNum].data1)
+                        sendVital(n, vitals.hp)
+
+                    elif Spell[spellNum].type == SPELL_TYPE_ADDMP:
+                        setPlayerVital(n, vitals.mp, getPlayerVital(n, vitals.mp) + Spell[spellNum].data1)
+                        sendVital(n, vitals.mp)
+
+                    elif Spell[spellNum].type == SPELL_TYPE_ADDSP:
+                        setPlayerVital(n, vitals.sp, getPlayerVital(n, vitals.sp) + Spell[spellNum].data1)
+                        sendVital(n, vitals.sp)
+
+                    casted = True
+
+    elif targetType == TARGET_TYPE_NPC:
+        if Npc[mapNPC[getPlayerMap(index)][n].num].behaviour != NPC_BEHAVIOUR_FRIENDLY and Npc[mapNPC[getPlayerMap(index)][n].num].behaviour != NPC_BEHAVIOUR_SHOPKEEPER:
+            canCast = True
+
+        targetName = Npc[mapNPC[getPlayerMap(index)][n].num].name
+
+        if canCast:
+            if Spell[spellNum].type == SPELL_TYPE_ADDHP:
+                mapNPC[getPlayerMap(index)][n].vital[vitals.hp] += Spell[spellNum].data1
+
+            elif Spell[spellNum].type == SPELL_TYPE_SUBHP:
+                damage = (getPlayerStat(index, stats.magic) // 4) + Spell[spellNum].data1 - (Npc[mapNPC[getPlayerMap(index)][n].num].stat[stats.defense] // 2)
+
+                if damage > 0:
+                    attackNpc(index, n, damage)
+
+                else:
+                    playerMsg(index, 'The spell was too weak to hurt ' + targetName + '!', textColor.BRIGHT_RED)
+
+            elif Spell[spellNum].type == SPELL_TYPE_ADDMP:
+                mapNPC[getPlayerMap(index)][n].vital[vitals.mp] += Spell[spellNum].data1
+
+            elif Spell[spellNum].type == SPELL_TYPE_SUBMP:
+                mapNPC[getPlayerMap(index)][n].vital[vitals.mp] -= Spell[spellNum].data1
+
+            elif Spell[spellNum].type == SPELL_TYPE_ADDSP:
+                mapNPC[getPlayerMap(index)][n].vital[vitals.sp] += Spell[spellNum].data1
+
+            elif Spell[spellNum].type == SPELL_TYPE_SUBSP:
+                mapNPC[getPlayerMap(index)][n].vital[vitals.sp] -= Spell[spellNum].data1
+
+            casted = True
+
+    if casted:
+        mapMsg(getPlayerMap(index), getPlayerName(index) + ' casts ' + Spell[spellNum].name + ' on ' + targetName + '.', textColor.BRIGHT_BLUE)
+        #sendDataToMap
+
+        # take away mana points
+        setPlayerVital(index, vitals.mp, getPlayerVital(index, vitals.mp) - reqMp)
+        sendVital(index, vitals.mp)
+
+        TempPlayer[index].attackTimer = time.time()
+        TempPlayer[index].castedSpell = True
+
+
+
+
+
 
 def playerWarp(index, mapNum, x, y):
+    if mapNum < 0 or mapNum > MAX_MAPS:
+        return
+
+    TempPlayer[index].target = None
+    TempPlayer[index].targetType = TARGET_TYPE_NONE
+
+    # check for shop on the map player is leaving and if so say goodbye
+
+    # erase play data to map
     oldMap = getPlayerMap(index)
 
     if oldMap != mapNum:
@@ -293,9 +454,19 @@ def playerWarp(index, mapNum, x, y):
     setPlayerX(index, x)
     setPlayerY(index, y)
 
-    playersOnMap[mapNum] = 1
+    # check if there is shop on the map and say hello if so
 
-    TempPlayer[index].gettingMap = 1
+    if getTotalMapPlayers(mapNum) == 0:
+        playersOnMap[mapNum] = False
+
+        # regenerate all NPCs health
+        for i in range(MAX_MAP_NPCS):
+            if mapNPC[oldMap][i].num != None:
+                mapNPC[oldMap][i].vital[Vitals.hp] = getNpcMaxVital(mapNPC[oldMap][i].num, Vitals.hp)
+
+    playersOnMap[mapNum] = True
+
+    TempPlayer[index].gettingMap = True
 
     packet = json.dumps([{"packet": ServerPackets.SCheckForMap, "mapnum": mapNum, "revision": Map[mapNum].revision}])
     g.conn.sendDataTo(index, packet)
@@ -345,6 +516,9 @@ def leftGame(index):
     if TempPlayer[index].inGame:
         TempPlayer[index].inGame = False
 
+        if getTotalMapPlayers(getPlayerMap(index)) < 1:
+            playersOnMap[getPlayerMap(index)] = False
+
         savePlayer(index)
 
         # send global msg that player left game
@@ -357,6 +531,7 @@ def leftGame(index):
         sendLeftGame(index)
 
         g.totalPlayersOnline -= 1
+        clearPlayer(index)
         updateHighIndex()
 
     clearPlayer(index)
@@ -444,9 +619,9 @@ def spawnNpc(mapNpcNum, mapNum):
         mapNPC[mapNum][mapNpcNum].num = npcNum
         mapNPC[mapNum][mapNpcNum].target = None
 
-        mapNPC[mapNum][mapNpcNum].vital[Vitals.hp] = 10 #todo
-        mapNPC[mapNum][mapNpcNum].vital[Vitals.mp] = 7 #todo
-        mapNPC[mapNum][mapNpcNum].vital[Vitals.sp] = 5 #todo
+        mapNPC[mapNum][mapNpcNum].vital[Vitals.hp] = getNpcMaxVital(npcNum, Vitals.hp)
+        mapNPC[mapNum][mapNpcNum].vital[Vitals.mp] = getNpcMaxVital(npcNum, Vitals.mp)
+        mapNPC[mapNum][mapNpcNum].vital[Vitals.sp] = getNpcMaxVital(npcNum, Vitals.sp)
 
         mapNPC[mapNum][mapNpcNum].dir = random.randint(0, 3)
 
@@ -857,6 +1032,46 @@ def npcAttackPlayer(mapNpcNum, victim, damage):
         # say damage
         playerMsg(victim, 'A ' + name + ' hit you for ' + str(damage) + ' hit points.', textColor.BRIGHT_RED)
 
+def getTotalMapPlayers(mapNum):
+    n = 0
+    for i in range(len(g.playersOnline)):
+        if isPlaying(g.playersOnline[i]) and getPlayerMap(g.playersOnline[i]) == mapNum:
+            n += 1
+
+    return n
+
+def getNpcMaxVital(npcNum, vital):
+    if npcNum < 0 or npcNum > MAX_NPCS:
+        return 0
+
+    if vital == Vitals.hp:
+        statStr = NPC[npcNum].stat[Stats.strength]
+        statDef = NPC[npcNum].stat[Stats.defense]
+        return statStr * statDef
+
+    elif vital == Vitals.mp:
+        return NPC[npcNum].stat[Stats.magic] * 2
+
+    elif vital == Vitals.sp:
+        return NPC[npcNum].stat[Stats.speed] * 2
+
+
+def getNpcVitalRegen(npcNum, vital):
+    if npcNum < 0 or npcNum > MAX_NPCS:
+        return 0
+
+    if vital == Vitals.hp:
+        i = NPC[npcNum].stat[Stats.defense] // 3
+        if i < 1:
+            i = 1
+
+        return i
+
+    #elif vital == vitals.mp:
+
+    #elif vital == vitals.sp:
+
+
 def findOpenInvSlot(index, itemNum):
     if not isPlaying(index) or itemNum < 0 or itemNum > MAX_ITEMS:
         return
@@ -873,6 +1088,11 @@ def findOpenInvSlot(index, itemNum):
             return i
 
     return None
+
+def hasSpell(index, spellNum):
+    for i in range(MAX_PLAYER_SPELLS):
+        if getPlayerSpell(index, i) == spellNum:
+            return True
 
 def hasItem(index, itemNum):
     if not isPlaying(index) or itemNum < 0 or itemNum > MAX_ITEMS:
@@ -1217,8 +1437,6 @@ def damageEquipment(index, equipmentSlot):
 
 
 def updateHighIndex():
-    # TODO ALOT
-
     # no players are logged in
     if g.totalPlayersOnline < 1:
         g.highIndex = 0
@@ -1232,6 +1450,9 @@ def updateHighIndex():
         if len(getPlayerLogin(i)) > 0:
             g.playersOnline.append(i)
             g.highIndex = i
+
+            if len(g.playersOnline) >= g.totalPlayersOnline:
+                break
 
     packet = json.dumps([{"packet": ServerPackets.SHighIndex, "highindex": g.highIndex}])
     g.conn.sendDataToAll(packet)
@@ -1278,7 +1499,6 @@ def hackingAttempt(index, reason):
             globalMsg(getPlayerLogin(index) + '/' + getPlayerName(index) + ' has been booted for (' + reason +')', textColor.WHITE)
 
         alertMsg(index, 'You have lost your connection with ' + GAME_NAME + '.')
-
         g.conn.closeConnection(index)
 
 

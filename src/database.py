@@ -352,7 +352,7 @@ def savePlayer(index):
                 if spbRows is None:
                     # doesnt exist, so add the spell
                     spbQuery = database.sendQuery('INSERT INTO spellbook (character_id, spellnum) \
-                                                               VALUES (?, ?, ?, ?);', \
+                                                               VALUES (?, ?);', \
                                                                  (charId, \
                                                                  spellNum+1))
 
@@ -423,14 +423,11 @@ def loadPlayer(index, name):
                 except:
                     break
 
-            print 'todo'
-
             # load spellbook
             spbQuery = database.sendQuery("SELECT * FROM spellbook WHERE character_id=%i;" % charId)
             spbRow = spbQuery.fetchall()
 
             for k in range(len(spbRow)):
-                print k
                 try:
                     setPlayerSpell(index, k, spbRow[k]['spellnum']-1)
 

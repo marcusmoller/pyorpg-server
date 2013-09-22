@@ -1,6 +1,7 @@
 import time
 import logging
 import logging.handlers
+import base64
 
 # todo: gui
 #from gui import ServerGUI
@@ -126,17 +127,22 @@ class gameServerProtocol(LineReceiver):
         global dataHandler
         clientIndex = self.factory.clients.index(self)
 
-        g.connectionLogger.debug("Received data from " + str(self.transport.getPeer().host))
-        g.connectionLogger.debug(" -> " + data)
+        # handle base64 data
+        decodedData = base64.b64decode(data)
 
-        dataHandler.handleData(clientIndex, data)
+        g.connectionLogger.debug("Received data from " + str(self.transport.getPeer().host))
+        g.connectionLogger.debug(" -> " + decodedData)
+
+        dataHandler.handleData(clientIndex, decodedData)
 
     def closeConnection(self, index):
         ''' closes connection with client #index '''
         print 'closeConnection() todo'
 
     def sendDataTo(self, index, data):
-        self.factory.clients[index].sendLine(data)
+        # encode data using base64
+        encodedData = base64.b64encode(data)
+        self.factory.clients[index].sendLine(encodedData)
 
     def sendDataToAll(self, data):
         for i in range(0, len(self.factory.clients)):

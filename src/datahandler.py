@@ -34,8 +34,20 @@ class DataHandler():
         elif packetType == ClientPackets.CSayMsg:
             self.handleSayMsg(index, jsonData)
 
+        elif packetType == ClientPackets.CEmoteMsg:
+            self.handleEmoteMsg(index, jsonData)
+
+        elif packetType == ClientPackets.CBroadcastMsg:
+            self.handleBroadcastMsg(index, jsonData)
+
+        elif packetType == ClientPackets.CGlobalMsg:
+            self.handleGlobalMsg(index, jsonData)
+
+        elif packetType == ClientPackets.CAdminMsg:
+            self.handleAdminMsg(index, jsonData)
+
         elif packetType == ClientPackets.CPlayerMsg:
-            self.handlePlayerMsg(index)
+            self.handlePlayerMsg(index, jsonData)
 
         elif packetType == ClientPackets.CPlayerMove:
             self.handlePlayerMove(index, jsonData)
@@ -260,9 +272,46 @@ class DataHandler():
         msg = jsonData[0]["msg"]
         mapMsg(getPlayerMap(index), getPlayerName(index) + ': ' + msg, sayColor)
 
+    def handleEmoteMsg(self, index, jsonData):
+        msg = jsonData[0]["msg"]
+        mapMsg(getPlayerMap(index), getPlayerName(index) + ' ' + msg, emoteColor)
+
+    def handleBroadcastMsg(self, index, jsonData):
+        msg = jsonData[0]["msg"]
+
+        # prevent hacking
+        # check size
+        string = getPlayerName(index) + ': ' + msg
+        globalMsg(string, broadcastColor)
+
+    def handleGlobalMsg(self, index, jsonData):
+        msg = jsonData[0]["msg"]
+        if getPlayerAccess(index) > 0:
+            string = '(global) ' + getPlayerName(index) +': ' + msg
+            globalMsg(string, globalColor)
+
+    def handleAdminMsg(self, index, jsonData):
+        msg = jsonData[0]["msg"]
+        if getPlayerAccess(index) > 0:
+            string = '(admin ' + getPlayerName(index) +') ' + msg
+            globalMsg(string, adminColor)
+
     ''' Player message '''
-    def handlePlayerMsg(self, index):
-        print "player msg"
+    def handlePlayerMsg(self, index, jsonData):
+        msg = jsonData[0]["msg"]
+        msgTo = findPlayer(jsonData[0]["msgto"])
+
+        # check if they are talking to themselves
+        if msgTo != index:
+            if msgTo is not None:
+                playerMsg(msgTo, getPlayerName(index) + ' tells you "' + getPlayerName(msgTo) + ', ' + msg + '"', tellColor)
+                playerMsg(index, 'You tell ' + getPlayerName(msgTo) + ', "' + msg + '"', tellColor)
+
+            else:
+                playerMsg(index, 'Player is not online.', textColor.WHITE)
+
+        else:
+            playerMsg(index, 'You cannot message yourself.', textColor.BRIGHT_RED)
 
     ''' Player movement '''
     def handlePlayerMove(self, index, jsonData):

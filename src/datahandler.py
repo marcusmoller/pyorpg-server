@@ -198,6 +198,8 @@ class DataHandler():
 
                 if isMultiAccounts(plrName):
                     alertMsg(index, "That account is already logged in!")
+                    g.conn.closeConnection(index)
+
                     return
 
                 # load the player
@@ -530,7 +532,7 @@ class DataHandler():
             if canAttackNpc(index, i):
                 # get the damage we can do
                 if not canPlayerCriticalHit(index):
-                    damage = getPlayerDamage(index) - (NPC[mapNPC[getPlayerMap(index)][i].num].stat[Stats.strength] // 2)
+                    damage = getPlayerDamage(index) - (NPC[mapNPC[getPlayerMap(index)][i].num].stat[Stats.defense] // 2)
 
                 else:
                     n = getPlayerDamage(index)

@@ -680,14 +680,16 @@ class DataHandler():
         #todo: fix [0]
         for x in range(MAX_MAPX):
             for y in range(MAX_MAPY):
-                Map[mapNum].tile[x][y].ground = jsonData[tile_i][0]["ground"]
-                Map[mapNum].tile[x][y].mask = jsonData[tile_i][0]["mask"]
-                Map[mapNum].tile[x][y].anim = jsonData[tile_i][0]["animation"]
+                Map[mapNum].tile[x][y].layer1 = jsonData[tile_i][0]["layer1"]
+                Map[mapNum].tile[x][y].layer2 = jsonData[tile_i][0]["layer2"]
+                Map[mapNum].tile[x][y].layer3 = jsonData[tile_i][0]["layer3"]
+                Map[mapNum].tile[x][y].mask   = jsonData[tile_i][0]["mask"]
+                Map[mapNum].tile[x][y].anim   = jsonData[tile_i][0]["animation"]
                 Map[mapNum].tile[x][y].fringe = jsonData[tile_i][0]["fringe"]
-                Map[mapNum].tile[x][y].type = jsonData[tile_i][0]["type"]
-                Map[mapNum].tile[x][y].data1 = jsonData[tile_i][0]["data1"]
-                Map[mapNum].tile[x][y].data2 = jsonData[tile_i][0]["data2"]
-                Map[mapNum].tile[x][y].data3 = jsonData[tile_i][0]["data3"]
+                Map[mapNum].tile[x][y].type   = jsonData[tile_i][0]["type"]
+                Map[mapNum].tile[x][y].data1  = jsonData[tile_i][0]["data1"]
+                Map[mapNum].tile[x][y].data2  = jsonData[tile_i][0]["data2"]
+                Map[mapNum].tile[x][y].data3  = jsonData[tile_i][0]["data3"]
 
                 tile_i += 1
 

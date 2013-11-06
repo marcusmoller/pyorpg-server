@@ -112,7 +112,9 @@ class TempPlayerClass():
 
 class TileClass():
     def __init__(self):
-        self.ground = None
+        self.layer1 = None
+        self.layer2 = None
+        self.layer3 = None
         self.mask = 0
         self.anim = 0
         self.fringe = None

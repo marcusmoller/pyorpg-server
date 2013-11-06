@@ -1563,7 +1563,9 @@ def mapCacheCreate(mapNum):
     for x in range(MAX_MAPX):
         for y in range(MAX_MAPY):
             tempTile = Map[mapNum].tile[x][y]
-            mapData.append([{"ground":    tempTile.ground, \
+            mapData.append([{"layer1":    tempTile.layer1, \
+                             "layer2":    tempTile.layer2, \
+                             "layer3":    tempTile.layer3, \
                              "mask":      tempTile.mask, \
                              "animation": tempTile.anim, \
                              "fringe":    tempTile.fringe, \

@@ -195,11 +195,14 @@ class DataHandler():
                 if not passwordOK(plrName, plrPassword):
                     alertMsg(index, "Wrong account name or password!")
                     return
-
+                
+                ''' fixed by Judicaël CLAIR, nickname Asew email: clair.judicael@gmail.com '''
+                ''' see server.py for rest of fix '''
                 if isMultiAccounts(plrName):
-                    alertMsg(index, "That account is already logged in!")
-                    g.conn.closeConnection(index)
-
+                    alertMsg(index, "That account is already logged in! Please retry in a minute.")
+                    for i in range(g.totalPlayersOnline):
+                        if str(Player[g.playersOnline[i]].Login).lower() == plrName.lower():
+                            g.conn.closeConnection(Player[g.playersOnline[i]].index)
                     return
 
                 # load the player

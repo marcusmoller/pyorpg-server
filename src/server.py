@@ -137,7 +137,13 @@ class gameServerProtocol(LineReceiver):
 
     def closeConnection(self, index):
         ''' closes connection with client #index '''
-        print 'closeConnection() todo'
+        ''' fixed by Judicaël CLAIR, nicknme Asew, email: clair.judicael@gmail.com --> tweeked datahandler doLogin to achieve this '''
+        g.connectionLogger.info('multi account has been detected --> closing connection')
+        try:
+            closeConnection(index)
+            self.factory.clients[index].transport.loseConnection()
+        except IOError, e:
+            g.connectionLogger.info('ERROR: ' + str(e))        
 
     def sendDataTo(self, index, data):
         # encode data using base64
@@ -496,6 +502,10 @@ def updateSavePlayers():
         g.serverLogger.info("Saving all players..")
 
         for i in range(g.totalPlayersOnline):
-            savePlayer(i)
+            ''' small fix by Judicaël CLAIR, a.k.a Asew '''
+            try:
+                savePlayer(i)
+            except:
+                ''' player disconnected during this loop '''
 
         g.serverLogger.info("Saved all players")

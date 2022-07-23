@@ -883,7 +883,7 @@ def attackNpc(attacker, mapNpcNum, damage):
 
         else:
             # player is in party
-            print 'player is in party, todo'
+            print('player is in party, todo')
 
         # drop loot if they have it
         n = random.randint(1, NPC[npcNum].dropChance)

@@ -127,8 +127,8 @@ class Database():
     def sendQuery(self, query, *args):
         try:
             return self.cursor.execute(query, *args)
-        except sqlite3.Error, msg:
-            print msg
+        except sqlite3.Error as msg:
+            print(msg)
 
     def saveChanges(self):
         self.conn.commit()
@@ -177,7 +177,7 @@ def addAccount(index, name, password):
     savePlayer(index)
 
 def deleteName(name):
-    print "todo"
+    print("todo")
 
 ##############
 # CHARACTERS #
@@ -189,7 +189,7 @@ def charExist(index, charNum):
 
 def addChar(index, name, sex, classNum, charNum):
     if len(Player[index].char[charNum].name) == 0:
-        print "addChar() init"
+        print("addChar() init")
         TempPlayer[index].charNum = charNum
 
         Player[index].char[charNum].name = name
@@ -216,7 +216,7 @@ def addChar(index, name, sex, classNum, charNum):
         savePlayer(index)
 
 def saveChar(index):
-    print "todo"
+    print("todo")
 
 
 def delChar(index, charNum):
@@ -472,7 +472,7 @@ def loadClasses():
 
 def saveClasses():
     # todo
-    print "todo"
+    print("todo")
 
 def clearClasses():
     for i in range(g.maxClasses):
@@ -559,7 +559,7 @@ def loadItems():
 
 def checkItems():
     for i in range(MAX_ITEMS):
-        print "probably not necassary"
+        print("probably not necassary")
 
 
 # Spells
@@ -610,7 +610,7 @@ def saveSpell(spellNum):
     database.saveChanges()
 
 def saveSpells():
-    print 'Saving spells...'
+    print('Saving spells...')
     for i in range(MAX_SPELLS):
         saveSpell(i)
 

@@ -158,7 +158,7 @@ class DataHandler():
             if not isLoggedIn(index):
                 # prevent hacking
                 if len(name) < 3 or len(password) < 3:
-                    print "hacking attempt"
+                    print("hacking attempt")
                     alertMsg(index, "Your name and password must be at least three characters in length.")
                     return
 
@@ -648,7 +648,7 @@ class DataHandler():
         direction = jsonData[0]["direction"]
 
         if direction < DIR_UP or direction > DIR_RIGHT:
-            print "hacking attempt"
+            print("hacking attempt")
             return
 
         playerMove(index, direction, 1)
